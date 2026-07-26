@@ -17,6 +17,19 @@
   --iq-charcoal: #111827;
   --iq-gold: #c9974b;
   --iq-mint: #4cbf9f;
+  --iq-soft-violet: rgba(127, 93, 222, 0.2);
+  --iq-soft-mint: rgba(34, 162, 129, 0.18);
+  --iq-soft-amber: rgba(205, 121, 58, 0.2);
+  --iq-deep-panel: #0b111d;
+  --iq-copper-panel: #6f3524;
+  --iq-glass-line: rgba(255, 255, 255, 0.72);
+  --iq-glass-shadow: 0 28px 80px rgba(22, 28, 43, 0.14), inset 0 1px 0 rgba(255, 255, 255, 0.78);
+  --iq-panel-violet: linear-gradient(145deg, rgba(245, 240, 255, 0.78) 0%, rgba(202, 184, 255, 0.44) 52%, rgba(132, 96, 218, 0.24) 100%);
+  --iq-panel-mint: linear-gradient(145deg, rgba(238, 255, 248, 0.76) 0%, rgba(155, 239, 211, 0.42) 52%, rgba(34, 162, 129, 0.22) 100%);
+  --iq-panel-amber: linear-gradient(145deg, rgba(255, 244, 229, 0.76) 0%, rgba(242, 168, 103, 0.42) 52%, rgba(151, 72, 41, 0.24) 100%);
+  --iq-panel-graphite: linear-gradient(145deg, rgba(235, 238, 244, 0.76) 0%, rgba(153, 160, 176, 0.34) 54%, rgba(35, 42, 58, 0.18) 100%);
+  --iq-panel-dark: linear-gradient(145deg, rgba(15, 22, 35, 0.94) 0%, rgba(10, 14, 23, 0.94) 54%, rgba(19, 20, 31, 0.94) 100%);
+  --iq-panel-copper: linear-gradient(145deg, rgba(113, 52, 34, 0.9) 0%, rgba(65, 31, 31, 0.92) 54%, rgba(18, 18, 28, 0.94) 100%);
   --iq-faint: color-mix(in srgb, var(--iq-muted) 72%, transparent);
   --iq-line-strong: color-mix(in srgb, var(--iq-line) 68%, var(--iq-blue));
   --iq-surface-solid: var(--iq-surface-strong);
@@ -29,17 +42,26 @@
   overflow-x: clip;
   isolation: isolate;
   color: var(--iq-ink);
-  background:
-    radial-gradient(circle at 12% 9%, rgba(107, 158, 255, 0.14), transparent 24vw),
-    radial-gradient(circle at 82% 74%, rgba(242, 125, 66, 0.07), transparent 24vw),
-    linear-gradient(180deg, var(--bg) 0%, #f9faf8 42%, var(--iq-cream) 100%);
+  background: linear-gradient(180deg, #f4f7fb 0%, #fbfcfd 46%, #fff6ed 100%);
 }
 
 :global(.dark) .page {
-  background:
-    radial-gradient(circle at 10% 10%, rgba(71, 119, 255, 0.18), transparent 30vw),
-    radial-gradient(circle at 82% 76%, rgba(242, 125, 66, 0.07), transparent 26vw),
-    linear-gradient(180deg, #060912 0%, #0a101c 50%, #100b18 100%);
+  --iq-cream: #120d16;
+  --iq-silver: #151a25;
+  --iq-soft-violet: rgba(127, 93, 222, 0.16);
+  --iq-soft-mint: rgba(34, 162, 129, 0.14);
+  --iq-soft-amber: rgba(205, 121, 58, 0.15);
+  --iq-deep-panel: #090f1a;
+  --iq-copper-panel: #6a301e;
+  --iq-glass-line: rgba(219, 226, 242, 0.15);
+  --iq-glass-shadow: 0 30px 90px rgba(0, 0, 0, 0.38), inset 0 1px 0 rgba(255, 255, 255, 0.12);
+  --iq-panel-violet: linear-gradient(145deg, rgba(103, 78, 160, 0.56) 0%, rgba(25, 22, 38, 0.9) 50%, rgba(9, 11, 19, 0.95) 100%);
+  --iq-panel-mint: linear-gradient(145deg, rgba(38, 128, 103, 0.5) 0%, rgba(13, 32, 31, 0.9) 50%, rgba(7, 12, 20, 0.95) 100%);
+  --iq-panel-amber: linear-gradient(145deg, rgba(133, 73, 39, 0.56) 0%, rgba(39, 24, 25, 0.92) 50%, rgba(9, 11, 19, 0.95) 100%);
+  --iq-panel-graphite: linear-gradient(145deg, rgba(81, 86, 99, 0.58) 0%, rgba(22, 25, 34, 0.92) 50%, rgba(8, 11, 18, 0.95) 100%);
+  --iq-panel-dark: linear-gradient(145deg, rgba(11, 19, 33, 0.96) 0%, rgba(8, 13, 24, 0.96) 48%, rgba(17, 18, 29, 0.96) 100%);
+  --iq-panel-copper: linear-gradient(145deg, rgba(116, 52, 31, 0.96) 0%, rgba(46, 23, 29, 0.96) 50%, rgba(13, 18, 33, 0.96) 100%);
+  background: linear-gradient(180deg, #060912 0%, #080d19 52%, #0b0a14 100%);
 }
 
 .main {
@@ -190,14 +212,14 @@
   border: 1px solid var(--iq-line);
   border-radius: var(--iq-radius);
   background:
-    linear-gradient(145deg, rgba(255, 255, 255, 0.74), color-mix(in srgb, var(--iq-cream) 38%, rgba(239, 245, 255, 0.42)));
+    linear-gradient(145deg, rgba(255, 255, 255, 0.82), var(--iq-soft-violet));
   box-shadow: var(--shadow);
   overflow: hidden;
 }
 
 :global(.dark) .heroVisual {
   background:
-    linear-gradient(145deg, rgba(21, 33, 61, 0.62), rgba(12, 12, 26, 0.56));
+    linear-gradient(145deg, rgba(16, 24, 44, 0.86), rgba(8, 12, 24, 0.9));
 }
 
 .heroVisual svg,
@@ -218,8 +240,7 @@
   background:
     linear-gradient(90deg, color-mix(in srgb, var(--iq-line) 52%, transparent) 1px, transparent 1px),
     linear-gradient(color-mix(in srgb, var(--iq-line) 52%, transparent) 1px, transparent 1px),
-    radial-gradient(circle at calc(24% + var(--strategy-progress) * 42%) 32%, rgba(30, 99, 244, 0.17), transparent 28%),
-    color-mix(in srgb, var(--iq-surface-solid) 84%, var(--iq-cream) 16%);
+    linear-gradient(145deg, rgba(255, 255, 255, 0.74), color-mix(in srgb, var(--iq-soft-violet) 74%, var(--iq-surface)));
   background-size: 42px 42px, 42px 42px, auto, auto;
 }
 
@@ -567,17 +588,11 @@
   display: grid;
   align-items: center;
   padding: 110px 0 80px;
-  background:
-    radial-gradient(circle at 72% 24%, rgba(30, 99, 244, 0.13), transparent 30vw),
-    radial-gradient(circle at 18% 78%, rgba(242, 125, 66, 0.08), transparent 24vw),
-    linear-gradient(180deg, rgba(8, 29, 73, 0.035), rgba(255, 255, 255, 0));
+  background: linear-gradient(180deg, rgba(8, 29, 73, 0.025), rgba(255, 255, 255, 0));
 }
 
 :global(.dark) .systemPin {
-  background:
-    radial-gradient(circle at 72% 24%, rgba(30, 99, 244, 0.2), transparent 30vw),
-    radial-gradient(circle at 18% 78%, rgba(242, 125, 66, 0.08), transparent 24vw),
-    linear-gradient(180deg, rgba(255, 255, 255, 0.035), rgba(255, 255, 255, 0));
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.035), rgba(255, 255, 255, 0));
 }
 
 .systemGrid {
@@ -592,16 +607,12 @@
   padding: 18px;
   border: 1px solid var(--iq-line);
   border-radius: var(--iq-radius);
-  background:
-    radial-gradient(circle at 85% 16%, rgba(123, 111, 240, 0.08), transparent 28%),
-    linear-gradient(145deg, rgba(255, 255, 255, 0.72), color-mix(in srgb, var(--iq-cream) 24%, rgba(232, 241, 255, 0.42)));
+  background: linear-gradient(145deg, rgba(255, 255, 255, 0.78), var(--iq-soft-mint));
   box-shadow: var(--shadow);
 }
 
 :global(.dark) .systemVisual {
-  background:
-    radial-gradient(circle at 85% 16%, rgba(123, 111, 240, 0.1), transparent 28%),
-    linear-gradient(145deg, rgba(20, 37, 77, 0.62), rgba(16, 12, 29, 0.54));
+  background: linear-gradient(145deg, rgba(45, 51, 68, 0.72), rgba(8, 12, 24, 0.88));
 }
 
 .systemGhost {
@@ -663,9 +674,7 @@
 .bridge {
   --bridge-progress: 0;
   min-height: 100svh;
-  background:
-    radial-gradient(circle at 22% 28%, rgba(123, 111, 240, 0.08), transparent 26vw),
-    linear-gradient(180deg, transparent, rgba(8, 29, 73, 0.045), transparent);
+  background: linear-gradient(180deg, transparent, color-mix(in srgb, var(--iq-soft-violet) 34%, transparent), transparent);
 }
 
 .bridgeLayout {
@@ -680,8 +689,7 @@
   min-height: 520px;
   border: 1px solid var(--iq-line);
   border-radius: var(--iq-radius);
-  background:
-    linear-gradient(145deg, rgba(8, 29, 73, 0.96), rgba(18, 18, 32, 0.9));
+  background: linear-gradient(145deg, var(--iq-deep-panel), color-mix(in srgb, var(--iq-deep-panel) 82%, var(--iq-violet)));
   overflow: hidden;
 }
 
@@ -718,7 +726,7 @@
 .bridgeFlow span[data-active] {
   opacity: 1;
   border-color: color-mix(in srgb, var(--iq-blue-soft) 48%, var(--iq-orange) 16%);
-  background: linear-gradient(145deg, rgba(30, 99, 244, 0.16), rgba(242, 125, 66, 0.08));
+  background: linear-gradient(145deg, color-mix(in srgb, var(--iq-blue) 16%, transparent), color-mix(in srgb, var(--iq-soft-amber) 34%, transparent));
   transform: translateX(-50%) scale(1.03);
 }
 
@@ -776,10 +784,7 @@
   padding: clamp(30px, 5vw, 58px);
   border: 1px solid var(--iq-line);
   border-radius: var(--iq-radius);
-  background:
-    radial-gradient(circle at 88% 16%, rgba(30, 99, 244, 0.12), transparent 28vw),
-    radial-gradient(circle at 10% 86%, rgba(242, 125, 66, 0.08), transparent 24vw),
-    var(--iq-surface);
+  background: linear-gradient(145deg, color-mix(in srgb, var(--iq-surface) 88%, transparent), color-mix(in srgb, var(--iq-soft-violet) 18%, var(--iq-surface)));
   box-shadow: var(--shadow);
   overflow: hidden;
 }
@@ -888,7 +893,7 @@
 
 .audienceOptions button[aria-selected="true"] {
   border-color: color-mix(in srgb, var(--iq-blue) 44%, var(--iq-orange) 14%);
-  background: linear-gradient(145deg, rgba(30, 99, 244, 0.1), rgba(242, 125, 66, 0.055));
+  background: linear-gradient(145deg, color-mix(in srgb, var(--iq-blue) 10%, transparent), color-mix(in srgb, var(--iq-soft-amber) 24%, transparent));
 }
 
 .audienceOptions span {
@@ -982,7 +987,7 @@
 
 .optionActive {
   border-color: color-mix(in srgb, var(--iq-blue) 44%, var(--iq-orange) 14%) !important;
-  background: linear-gradient(145deg, rgba(30, 99, 244, 0.1), rgba(242, 125, 66, 0.055)) !important;
+  background: linear-gradient(145deg, color-mix(in srgb, var(--iq-blue) 10%, transparent), color-mix(in srgb, var(--iq-soft-amber) 24%, transparent)) !important;
 }
 
 .diagnosticControls {
@@ -1038,8 +1043,7 @@
 
 .finalPanel {
   grid-template-columns: minmax(0, 0.86fr) minmax(240px, auto);
-  background:
-    linear-gradient(145deg, rgba(8, 29, 73, 0.98), rgba(22, 17, 36, 0.94));
+  background: linear-gradient(145deg, var(--iq-deep-panel), color-mix(in srgb, var(--iq-copper-panel) 42%, var(--iq-deep-panel)));
   color: #f5f8ff;
 }
 
@@ -1214,9 +1218,7 @@
 .engine {
   position: relative;
   min-height: 100svh;
-  background:
-    radial-gradient(circle at 50% 50%, rgba(30, 99, 244, 0.07), transparent 37%),
-    color-mix(in srgb, var(--iq-bg) 90%, transparent);
+  background: linear-gradient(180deg, color-mix(in srgb, var(--iq-bg) 94%, transparent), color-mix(in srgb, var(--iq-soft-violet) 18%, var(--iq-bg)));
 }
 
 .engineSticky {
@@ -1227,10 +1229,7 @@
   overflow: hidden;
   border-top: 1px solid var(--iq-line);
   border-bottom: 1px solid var(--iq-line);
-  background:
-    radial-gradient(circle at 62% 48%, rgba(30, 99, 244, 0.1), transparent 34vw),
-    radial-gradient(circle at 18% 80%, rgba(242, 125, 66, 0.06), transparent 28vw),
-    color-mix(in srgb, var(--iq-bg) 86%, transparent);
+  background: linear-gradient(145deg, color-mix(in srgb, var(--iq-bg) 86%, transparent), color-mix(in srgb, var(--iq-soft-violet) 16%, var(--iq-bg)));
   backdrop-filter: blur(16px);
 }
 
@@ -1513,7 +1512,7 @@
   padding: 26px;
   border-left: 2px solid var(--iq-blue);
   border-radius: var(--iq-radius);
-  background: linear-gradient(90deg, color-mix(in srgb, var(--iq-blue) 7%, var(--iq-surface)), var(--iq-surface));
+  background: linear-gradient(90deg, color-mix(in srgb, var(--iq-blue) 7%, var(--iq-surface)), color-mix(in srgb, var(--iq-soft-violet) 10%, var(--iq-surface)));
   box-shadow: var(--shadow);
   backdrop-filter: blur(14px);
 }
@@ -1585,15 +1584,12 @@
   border: 1px solid color-mix(in srgb, var(--iq-blue) 28%, var(--iq-line));
   border-radius: var(--iq-radius);
   background:
-    radial-gradient(circle at 50% 22%, rgba(255, 255, 255, 0.84), transparent 38%),
-    color-mix(in srgb, var(--iq-surface) 90%, transparent);
+    linear-gradient(145deg, color-mix(in srgb, var(--iq-surface) 94%, transparent), color-mix(in srgb, var(--iq-soft-violet) 18%, var(--iq-surface)));
   box-shadow: 0 26px 70px rgba(30, 99, 244, 0.12), 0 18px 46px rgba(242, 125, 66, 0.08), inset 0 1px 0 rgba(255, 255, 255, 0.38);
 }
 
 :global(.dark) .platformHub {
-  background:
-    radial-gradient(circle at 50% 22%, rgba(255, 255, 255, 0.14), transparent 38%),
-    color-mix(in srgb, var(--iq-surface) 90%, transparent);
+  background: linear-gradient(145deg, color-mix(in srgb, var(--iq-surface) 94%, transparent), color-mix(in srgb, var(--iq-soft-violet) 18%, var(--iq-surface)));
 }
 
 .platformHub img {
@@ -1736,16 +1732,14 @@
   scroll-margin-top: 120px;
   overflow: hidden;
   border-top: 1px solid var(--iq-line);
-  background:
-    radial-gradient(circle at 50% 22%, rgba(30, 99, 244, 0.08), transparent 32vw),
-    color-mix(in srgb, var(--iq-surface) 55%, var(--iq-bg));
+  background: linear-gradient(180deg, color-mix(in srgb, var(--iq-surface) 55%, var(--iq-bg)), color-mix(in srgb, var(--iq-soft-violet) 16%, var(--iq-bg)));
 }
 
 .relationshipBackdrop {
   position: absolute;
   inset: 0;
   background:
-    linear-gradient(90deg, rgba(30, 99, 244, 0.045), transparent 35%, rgba(242, 125, 66, 0.055)),
+    linear-gradient(90deg, color-mix(in srgb, var(--iq-blue) 4%, transparent), transparent 35%, color-mix(in srgb, var(--iq-soft-amber) 12%, transparent)),
     repeating-linear-gradient(90deg, transparent 0 89px, var(--iq-line) 90px);
   opacity: calc(0.22 + var(--relationship-progress) * 0.34);
 }
@@ -1882,6 +1876,250 @@
 
 .relationship blockquote strong {
   color: var(--iq-blue);
+}
+
+/* CubeIT Home-inspired theme-aware palette pass */
+.heroVisual,
+.capabilityGrid article:nth-child(1),
+.problemSignals article:nth-child(1) {
+  background: var(--iq-panel-violet);
+}
+
+:global(.dark) .page .heroVisual {
+  background: var(--iq-panel-violet);
+}
+
+.capabilityGrid article:nth-child(2),
+.problemSignals article:nth-child(2) {
+  background: var(--iq-panel-mint);
+}
+
+.capabilityGrid article:nth-child(3),
+.problemSignals article:nth-child(3) {
+  background: var(--iq-panel-amber);
+}
+
+.strategyMetricGrid article,
+.capabilityGrid article:nth-child(n + 4),
+.problemSignals article:nth-child(4),
+.methodTrack article,
+.audienceResponse,
+.diagnostic {
+  background: var(--iq-panel-graphite);
+}
+
+.bridgeFlow,
+.finalPanel {
+  background: var(--iq-panel-dark);
+}
+
+.platformHub {
+  background: var(--iq-panel-violet);
+}
+
+.engineSteps article {
+  background: var(--iq-panel-graphite);
+}
+
+.platformCard[data-accent="blue"] {
+  background: var(--iq-panel-graphite);
+}
+
+.platformCard[data-accent="orange"] {
+  background: var(--iq-panel-amber);
+}
+
+.platformCard[data-accent="navy"] {
+  background: var(--iq-panel-mint);
+}
+
+.platformLineLayer span {
+  background: linear-gradient(180deg, color-mix(in srgb, var(--iq-blue) 82%, var(--iq-silver)), color-mix(in srgb, var(--iq-mint) 46%, var(--iq-blue)), var(--iq-gold));
+  box-shadow: 0 0 14px color-mix(in srgb, var(--iq-blue) 16%, transparent);
+}
+
+.relationshipSide:first-child,
+.relationshipSide:nth-child(3) {
+  padding: 30px;
+  border: 1px solid var(--iq-line);
+  border-radius: var(--iq-radius);
+}
+
+.relationshipSide:first-child {
+  background: var(--iq-panel-mint);
+}
+
+.relationshipSide:nth-child(3) {
+  background: var(--iq-panel-amber);
+}
+
+.bridgeFlow {
+  border-color: color-mix(in srgb, var(--iq-mint) 24%, var(--iq-line));
+}
+
+.bridgeFlow span[data-active],
+.differenceList article[data-active],
+.audienceOptions button[aria-selected="true"],
+.optionActive {
+  border-color: color-mix(in srgb, var(--iq-mint) 24%, var(--iq-orange) 16%) !important;
+}
+
+.heroVisual,
+.strategyMetricGrid article,
+.capabilityGrid article,
+.problemSignals article,
+.methodTrack article,
+.audienceResponse,
+.diagnostic,
+.engineSteps article,
+.platformHub,
+.platformCard,
+.relationshipSide:first-child,
+.relationshipSide:nth-child(3),
+.differenceList article,
+.bridgeFlow,
+.finalPanel {
+  position: relative;
+  overflow: hidden;
+  border-color: var(--iq-glass-line);
+  box-shadow: var(--iq-glass-shadow);
+  backdrop-filter: blur(18px) saturate(1.18);
+}
+
+.heroVisual::before,
+.strategyMetricGrid article::before,
+.capabilityGrid article::before,
+.problemSignals article::before,
+.methodTrack article::before,
+.audienceResponse::before,
+.diagnostic::before,
+.engineSteps article::before,
+.platformHub::before,
+.platformCard::before,
+.relationshipSide:first-child::before,
+.relationshipSide:nth-child(3)::before,
+.differenceList article::before,
+.bridgeFlow::after,
+.finalPanel::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  border-radius: inherit;
+  background:
+    linear-gradient(135deg, rgba(255, 255, 255, 0.58), transparent 34%),
+    linear-gradient(315deg, rgba(255, 255, 255, 0.18), transparent 42%);
+  opacity: 0.62;
+}
+
+:global(.dark) .heroVisual::before,
+:global(.dark) .strategyMetricGrid article::before,
+:global(.dark) .capabilityGrid article::before,
+:global(.dark) .problemSignals article::before,
+:global(.dark) .methodTrack article::before,
+:global(.dark) .audienceResponse::before,
+:global(.dark) .diagnostic::before,
+:global(.dark) .engineSteps article::before,
+:global(.dark) .platformHub::before,
+:global(.dark) .platformCard::before,
+:global(.dark) .relationshipSide:first-child::before,
+:global(.dark) .relationshipSide:nth-child(3)::before,
+:global(.dark) .differenceList article::before,
+:global(.dark) .bridgeFlow::after,
+:global(.dark) .finalPanel::before {
+  background:
+    linear-gradient(135deg, rgba(255, 255, 255, 0.16), transparent 34%),
+    linear-gradient(315deg, rgba(255, 255, 255, 0.08), transparent 42%);
+  opacity: 0.58;
+}
+
+.strategyMetricGrid article > *,
+.heroVisual > *,
+.capabilityGrid article > *,
+.problemSignals article > *,
+.methodTrack article > *,
+.audienceResponse > *,
+.diagnostic > *,
+.engineSteps article > *,
+.platformHub > *,
+.platformCard > *,
+.relationshipSide > *,
+.differenceList article > *,
+.bridgeFlow > *,
+.finalPanel > * {
+  position: relative;
+  z-index: 1;
+}
+
+.platformLineLayer span {
+  background: linear-gradient(180deg, #8cdcc8 0%, #34b897 45%, #d9a65a 100%);
+  box-shadow: 0 0 18px color-mix(in srgb, var(--iq-mint) 28%, transparent), 0 0 28px color-mix(in srgb, var(--iq-gold) 14%, transparent);
+}
+
+:global(.dark) .platformLineLayer span {
+  background: linear-gradient(180deg, #59c8b1 0%, #24977d 48%, #c9974b 100%);
+}
+
+.primaryButton {
+  background: linear-gradient(145deg, #62a1ff 0%, var(--iq-blue) 48%, #0a3f9c 100%);
+  box-shadow: 0 20px 52px rgba(30, 99, 244, 0.32), inset 0 1px 0 rgba(255, 255, 255, 0.52);
+}
+
+.heroGrid {
+  opacity: 0.28;
+  background-image:
+    linear-gradient(color-mix(in srgb, var(--iq-line) 72%, var(--iq-gold) 6%) 1px, transparent 1px),
+    linear-gradient(90deg, color-mix(in srgb, var(--iq-line) 72%, var(--iq-violet) 6%) 1px, transparent 1px);
+}
+
+.strategyVisualFrame::before {
+  background: linear-gradient(90deg, #53c1a7, #c9974b);
+  box-shadow: 0 0 18px color-mix(in srgb, var(--iq-mint) 18%, transparent);
+}
+
+.strategyVisualFrame::after {
+  border-color: color-mix(in srgb, var(--iq-violet) 18%, var(--iq-line));
+}
+
+.strategyCommandCenter {
+  border-color: var(--iq-glass-line);
+  background: var(--iq-panel-graphite);
+  box-shadow: var(--iq-glass-shadow);
+}
+
+.strategyAutomationRail span {
+  border-color: color-mix(in srgb, var(--iq-mint) 20%, var(--iq-line));
+  background: color-mix(in srgb, var(--iq-soft-mint) 34%, var(--iq-surface));
+}
+
+.bridgeFlow::before {
+  background: linear-gradient(180deg, #66d4be, #2da184, #c9974b);
+}
+
+.bridgeFlow span[data-active],
+.differenceList article[data-active],
+.audienceOptions button[aria-selected="true"],
+.optionActive {
+  background: linear-gradient(145deg, color-mix(in srgb, var(--iq-soft-mint) 28%, transparent), color-mix(in srgb, var(--iq-soft-amber) 28%, transparent)) !important;
+}
+
+.differenceList article[data-active] {
+  background: var(--iq-panel-graphite);
+}
+
+.diagnosticProgress span {
+  background: linear-gradient(90deg, #34b897, #c9974b, #a55f35);
+}
+
+.relationshipBackdrop {
+  background:
+    linear-gradient(90deg, color-mix(in srgb, var(--iq-soft-mint) 9%, transparent), transparent 38%, color-mix(in srgb, var(--iq-soft-amber) 14%, transparent)),
+    repeating-linear-gradient(90deg, transparent 0 89px, var(--iq-line) 90px);
+}
+
+.toolExplanation {
+  border-left-color: var(--iq-mint);
+  background: var(--iq-panel-graphite);
 }
 
 @media (max-width: 1100px) {
