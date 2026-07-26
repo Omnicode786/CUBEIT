@@ -2,6 +2,14 @@
 
 import type { CSSProperties, ElementType, ReactNode } from "react";
 
+type SplitTagProps = {
+  className?: string;
+  "aria-label": string;
+  "data-cubeiq-split": "words" | "lines";
+  style: CSSProperties;
+  children: ReactNode;
+};
+
 type AnimatedTextProps = {
   as?: ElementType;
   children: string;
@@ -18,9 +26,10 @@ export function AnimatedText({
   delay = 0,
 }: AnimatedTextProps) {
   const parts = mode === "lines" ? children.split("\n") : children.split(/\s+/);
+  const SplitTag = Tag as ElementType<SplitTagProps>;
 
   return (
-    <Tag
+    <SplitTag
       className={className}
       aria-label={children.replace(/\n/g, " ")}
       data-cubeiq-split={mode}
@@ -41,7 +50,7 @@ export function AnimatedText({
           </span>
         </span>
       ))}
-    </Tag>
+    </SplitTag>
   );
 }
 
