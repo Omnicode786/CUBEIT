@@ -46,6 +46,12 @@ function entryProgress(rect: DOMRect, viewportHeight: number) {
   return clamp((viewportHeight - rect.top) / Math.max(1, viewportHeight + rect.height * 0.35));
 }
 
+function horizontalCanvasOpacity(progress: number) {
+  if (progress < 0.08) return 1;
+  if (progress > 0.88) return 0.02;
+  return 1 - clamp((progress - 0.08) / 0.16) * 0.98;
+}
+
 export function useServicesScrollTimeline({
   introRef,
   storyRef,
@@ -58,6 +64,7 @@ export function useServicesScrollTimeline({
   const timelineRef = useRef<ServicesTimelineState>({ ...initialTimeline });
   const [horizontalHeight, setHorizontalHeight] = useState<number>(0);
   const maxTranslateRef = useRef(0);
+  const horizontalHeightRef = useRef(0);
 
   useEffect(() => {
     let frame = 0;
@@ -72,14 +79,23 @@ export function useServicesScrollTimeline({
 
       if (reducedMotion || window.innerWidth < 900) {
         maxTranslateRef.current = 0;
-        setHorizontalHeight(0);
+        if (horizontalHeightRef.current !== 0) {
+          horizontalHeightRef.current = 0;
+          setHorizontalHeight(0);
+        }
         section.style.removeProperty("--services-horizontal-x");
+        section.style.removeProperty("--services-horizontal-progress");
+        section.style.removeProperty("--services-horizontal-header-opacity");
         return;
       }
 
       const maxTranslate = Math.max(0, track.scrollWidth - viewport.clientWidth);
+      const nextHeight = Math.max(window.innerHeight * 1.2, maxTranslate + window.innerHeight);
       maxTranslateRef.current = maxTranslate;
-      setHorizontalHeight(Math.max(window.innerHeight * 1.2, maxTranslate + window.innerHeight));
+      if (Math.abs(horizontalHeightRef.current - nextHeight) > 2) {
+        horizontalHeightRef.current = nextHeight;
+        setHorizontalHeight(nextHeight);
+      }
     };
 
     const ro = new ResizeObserver(measure);
@@ -105,7 +121,15 @@ export function useServicesScrollTimeline({
       timelineRef.current.storyProgress = storyRect ? progressThrough(storyRect, viewportHeight) : 0;
       timelineRef.current.horizontalProgress = horizontalRect ? progressThrough(horizontalRect, viewportHeight) : 0;
       timelineRef.current.selectorProgress = selectorRect ? entryProgress(selectorRect, viewportHeight) : 0;
-      timelineRef.current.scrollVelocity = clamp(velocity * 0.35, -1, 1);
+      const nextVelocity = clamp(velocity * 0.35, -1, 1);
+      timelineRef.current.scrollVelocity += (nextVelocity - timelineRef.current.scrollVelocity) * 0.18;
+      const selectorFadeIn = clamp((timelineRef.current.selectorProgress - 0.05) / 0.35);
+      const selectorAccentOpacity = selectorFadeIn * 0.12;
+      const selectorExit = selectorRect
+        ? clamp(((viewportHeight * 0.94) - selectorRect.bottom) / Math.max(1, viewportHeight * 0.5))
+        : 0;
+      const canvasOpacity = Math.max(horizontalCanvasOpacity(timelineRef.current.horizontalProgress), selectorAccentOpacity) * (1 - selectorExit);
+      document.documentElement.style.setProperty("--services-canvas-opacity", `${canvasOpacity}`);
 
       if (!reducedMotion && window.innerWidth >= 900 && horizontalRef.current && maxTranslateRef.current > 0) {
         const x = -maxTranslateRef.current * timelineRef.current.horizontalProgress;
@@ -125,6 +149,7 @@ export function useServicesScrollTimeline({
       cancelAnimationFrame(frame);
       ro.disconnect();
       window.removeEventListener("resize", measure);
+      document.documentElement.style.removeProperty("--services-canvas-opacity");
     };
   }, [horizontalRef, horizontalTrackRef, horizontalViewportRef, introRef, reducedMotion, selectorRef, storyRef]);
 

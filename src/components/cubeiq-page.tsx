@@ -1,46 +1,44 @@
 "use client";
 
-import dynamic from "next/dynamic";
 import Image from "next/image";
 import Link from "next/link";
-import { useEffect, useMemo, useRef, useState } from "react";
-import type { CSSProperties, RefObject } from "react";
+import { useEffect, useMemo, useRef, useState, type CSSProperties, type RefObject } from "react";
 import {
   ArrowDown,
   ArrowRight,
   ArrowUpRight,
   Check,
-  ChevronRight,
   CircleDot,
-  Gauge,
-  LineChart,
   MessageCircleMore,
-  MousePointer2,
   Network,
-  Play,
-  Search,
   Sparkles,
   Target,
-  Workflow,
+  Zap,
 } from "lucide-react";
 import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
-import { Navbar } from "./cubeit-site";
 import { AnimatedText } from "./AnimatedText";
+import { Footer, Navbar } from "./cubeit-site";
 import { MagneticLink } from "./MagneticLink";
 import GrowthDiagnostic from "./GrowthDiagnostic";
-import {
-  audienceOptions,
-  growthLayers,
-  methodSteps,
-  tools,
-} from "./cubeiq.data";
+import { audienceOptions, methodSteps, tools } from "./cubeiq.data";
 import styles from "./cubeiq.module.css";
 
-const CubeIQCanvas = dynamic(() => import("./CubeIQCanvas"), {
-  ssr: false,
-  loading: () => <div className={styles.canvasLoading} aria-hidden="true" />,
-});
+const difference = [
+  ["Most agencies stop at attention.", "CubeIQ follows what happens after the click."],
+  ["A better ad cannot fix a confusing page.", "We improve the message, page and next step together."],
+  ["A lead is not growth until it is handled.", "We connect follow-up so interest has a clear owner."],
+  ["Reports should create decisions.", "We show the movement that helps teams choose what to improve."],
+] as const;
+
+const capabilityCards = [
+  ["Performance advertising", "Reach buyers through search, social and retargeting with a controlled testing plan."],
+  ["Social and content", "Keep the brand visible, relevant and worth following."],
+  ["Creative and brand design", "Make every campaign and customer touchpoint feel professional and trusted."],
+  ["Search visibility", "Help people find the business when they are already looking."],
+  ["Website conversion", "Improve pages so more visitors take action."],
+  ["Follow-up automation", "Connect forms, CRM, WhatsApp and reminders into one response path."],
+] as const;
 
 const engineSteps = [
   ["Audience understanding", "See who the right customer is, what they care about and what is stopping them."],
@@ -55,26 +53,6 @@ const engineSteps = [
   ["Scalable growth", "Increase investment after the system is stable, measurable and ready."],
 ] as const;
 
-const deliverables = [
-  ["Growth strategy", "A clear view of the customer, offer, channels, conversion path and priorities."],
-  ["Campaign roadmap", "What launches first, what gets tested and what evidence decides the next move."],
-  ["Creative direction", "Messaging, campaign ideas and a consistent visual system built to create action."],
-  ["Execution", "Campaign setup, landing experiences, tracking, automation and follow-up working together."],
-  ["Reporting that leads somewhere", "A concise view of what moved, why it moved and what the team will do next."],
-  ["Connected technical support", "CubeIT can repair or build the technology layer when marketing exposes a system gap."],
-] as const;
-
-const proofSignals = [
-  ["Attention quality", "Are the right people arriving — and do they understand the offer?"],
-  ["Conversion movement", "Where do visitors hesitate, leave or take the next step?"],
-  ["Lead handling", "How quickly and consistently are real opportunities followed up?"],
-  ["Commercial learning", "Which message, channel and experience gives the business useful evidence?"],
-] as const;
-
-function dispatchTool(index: number) {
-  window.dispatchEvent(new CustomEvent("cubeiq:tool", { detail: { index } }));
-}
-
 function useCubeIQMotion(rootRef: RefObject<HTMLDivElement | null>) {
   useEffect(() => {
     const root = rootRef.current;
@@ -87,15 +65,18 @@ function useCubeIQMotion(rootRef: RefObject<HTMLDivElement | null>) {
       return;
     }
 
+    const clamp01 = (value: number) => Math.min(1, Math.max(0, value));
+    const rangeProgress = (progress: number, start: number, end: number) => clamp01((progress - start) / (end - start));
+
     const context = gsap.context(() => {
       gsap.utils.toArray<HTMLElement>("[data-reveal]").forEach((element) => {
         gsap.fromTo(
           element,
-          { y: 32, opacity: 0 },
+          { y: 26, opacity: 0 },
           {
             y: 0,
             opacity: 1,
-            duration: 1,
+            duration: 0.85,
             ease: "power3.out",
             scrollTrigger: { trigger: element, start: "top 86%", once: true },
           },
@@ -106,13 +87,13 @@ function useCubeIQMotion(rootRef: RefObject<HTMLDivElement | null>) {
         const parts = element.querySelectorAll<HTMLElement>(".cubeiq-split-part");
         gsap.fromTo(
           parts,
-          { yPercent: 112, rotateX: -18, opacity: 0 },
+          { yPercent: 105, rotateX: -10, opacity: 0 },
           {
             yPercent: 0,
             rotateX: 0,
             opacity: 1,
-            duration: 1.05,
-            stagger: 0.035,
+            duration: 0.95,
+            stagger: 0.04,
             ease: "power4.out",
             scrollTrigger: { trigger: element, start: "top 88%", once: true },
           },
@@ -120,33 +101,111 @@ function useCubeIQMotion(rootRef: RefObject<HTMLDivElement | null>) {
       });
 
       gsap.utils.toArray<SVGPathElement>("[data-draw-path]").forEach((path) => {
+        if (path.closest("[data-engine-section]")) return;
         const length = path.getTotalLength();
         gsap.set(path, { strokeDasharray: length, strokeDashoffset: length });
-        gsap.to(path, {
-          strokeDashoffset: 0,
-          ease: "none",
-          scrollTrigger: {
-            trigger: path.closest("section") ?? path,
-            start: "top 75%",
-            end: "bottom 38%",
-            scrub: 1,
-          },
-        });
+        if (!path.hasAttribute("data-system-path")) {
+          gsap.to(path, {
+            strokeDashoffset: 0,
+            ease: "none",
+            scrollTrigger: {
+              trigger: path.closest("section") ?? path,
+              start: "top 78%",
+              end: "bottom 42%",
+              scrub: 0.8,
+            },
+          });
+        }
       });
 
+      const compactViewport = window.matchMedia("(max-width: 900px)").matches;
+
+      const engine = root.querySelector<HTMLElement>("[data-engine-section]");
+      const enginePin = root.querySelector<HTMLElement>("[data-engine-pin]");
+      const enginePaths = gsap.utils.toArray<SVGPathElement>("[data-engine-path]");
       const engineWords = gsap.utils.toArray<HTMLElement>("[data-engine-word]");
-      gsap.utils.toArray<HTMLElement>("[data-engine-step]").forEach((step, index) => {
-        ScrollTrigger.create({
-          trigger: step,
-          start: "top 58%",
-          end: "bottom 42%",
-          onToggle: ({ isActive }) => {
-            step.toggleAttribute("data-active", isActive);
-            engineWords.forEach((word, wordIndex) => word.toggleAttribute("data-active", isActive && wordIndex === index));
-            root.style.setProperty("--engine-index", String(index));
-          },
-        });
+      const engineStepNodes = gsap.utils.toArray<HTMLElement>("[data-engine-step]");
+
+      enginePaths.forEach((path) => {
+        const length = path.getTotalLength();
+        path.dataset.pathLength = String(length);
+        gsap.set(path, { strokeDasharray: length, strokeDashoffset: length });
       });
+
+      if (engine && enginePin && enginePaths.length && !compactViewport) {
+        const setEngineState = (progress: number) => {
+          root.style.setProperty("--engine-progress", String(progress));
+          enginePaths.forEach((path) => {
+            const length = Number(path.dataset.pathLength || 0);
+            gsap.set(path, { strokeDashoffset: length * (1 - progress) });
+          });
+          const activeIndex = Math.min(engineStepNodes.length - 1, Math.floor(progress * engineStepNodes.length));
+          engineStepNodes.forEach((step, index) => step.toggleAttribute("data-active", index === activeIndex));
+          engineWords.forEach((word, index) => word.toggleAttribute("data-active", index === activeIndex));
+          root.style.setProperty("--engine-index", String(activeIndex));
+        };
+
+        setEngineState(0);
+        ScrollTrigger.create({
+          trigger: engine,
+          start: "top top",
+          end: () => `+=${Math.max(window.innerHeight * 6.4, engineStepNodes.length * 500)}`,
+          pin: enginePin,
+          pinSpacing: true,
+          scrub: 0.75,
+          invalidateOnRefresh: true,
+          refreshPriority: 3,
+          onUpdate: (self) => setEngineState(self.progress),
+          onLeave: () => setEngineState(1),
+          onEnterBack: (self) => setEngineState(self.progress),
+        });
+      } else if (engine && enginePaths.length) {
+        engineStepNodes.forEach((step) => step.setAttribute("data-active", ""));
+        enginePaths.forEach((path) => {
+          gsap.to(path, {
+            strokeDashoffset: 0,
+            ease: "none",
+            scrollTrigger: {
+              trigger: engine,
+              start: "top 78%",
+              end: "bottom 45%",
+              scrub: 0.7,
+            },
+          });
+        });
+      }
+
+      const bridge = root.querySelector<HTMLElement>("[data-bridge]");
+      const bridgePin = root.querySelector<HTMLElement>("[data-bridge-pin]");
+      const bridgeSteps = gsap.utils.toArray<HTMLElement>("[data-bridge-step]");
+      const differenceItems = gsap.utils.toArray<HTMLElement>("[data-difference-item]");
+      if (bridge && bridgePin && !compactViewport) {
+        const setBridgeState = (progress: number) => {
+          bridge.style.setProperty("--bridge-progress", String(progress));
+          const visibleIndex = Math.min(bridgeSteps.length - 1, Math.floor(progress * bridgeSteps.length));
+          bridgeSteps.forEach((step, index) => step.toggleAttribute("data-active", progress >= index / bridgeSteps.length - 0.02));
+          differenceItems.forEach((item, index) => item.toggleAttribute("data-active", index <= visibleIndex));
+        };
+
+        setBridgeState(0);
+        ScrollTrigger.create({
+          trigger: bridgePin,
+          start: "top 12%",
+          end: () => `+=${Math.max(window.innerHeight * 2.25, 1500)}`,
+          pin: bridgePin,
+          pinSpacing: true,
+          scrub: 0.78,
+          invalidateOnRefresh: true,
+          refreshPriority: 2,
+          onUpdate: (self) => setBridgeState(self.progress),
+          onLeave: () => setBridgeState(1),
+          onEnterBack: (self) => setBridgeState(self.progress),
+        });
+      } else if (bridge) {
+        bridge.style.setProperty("--bridge-progress", "1");
+        bridgeSteps.forEach((step) => step.setAttribute("data-active", ""));
+        differenceItems.forEach((item) => item.setAttribute("data-active", ""));
+      }
 
       const systemTrack = root.querySelector<HTMLElement>("[data-system-track]");
       if (systemTrack) {
@@ -160,44 +219,94 @@ function useCubeIQMotion(rootRef: RefObject<HTMLDivElement | null>) {
               trigger: systemTrack,
               start: "top 82%",
               end: "bottom 38%",
-              scrub: 1,
+              scrub: 0.8,
             },
           },
         );
+      }
+
+      const platform = root.querySelector<HTMLElement>("[data-platform-section]");
+      const platformPin = root.querySelector<HTMLElement>("[data-platform-pin]");
+      const platformCards = gsap.utils.toArray<HTMLElement>("[data-platform-card]");
+      if (platform && platformPin && !compactViewport) {
+        const setPlatformState = (progress: number) => {
+          platform.style.setProperty("--platform-main", String(rangeProgress(progress, 0.02, 0.18)));
+          platform.style.setProperty("--platform-branch", String(rangeProgress(progress, 0.18, 0.58)));
+          platform.style.setProperty("--platform-drop", String(rangeProgress(progress, 0.58, 0.9)));
+          platformCards.forEach((card, index) => {
+            const threshold = index < 8 ? 0.25 + index * 0.028 : 0.66 + (index - 8) * 0.028;
+            card.toggleAttribute("data-active", progress >= threshold);
+          });
+        };
+
+        setPlatformState(0);
+        ScrollTrigger.create({
+          trigger: platformPin,
+          start: "top 12%",
+          end: () => `+=${Math.max(window.innerHeight * 3.25, 2600)}`,
+          pin: platformPin,
+          pinSpacing: true,
+          scrub: 0.82,
+          invalidateOnRefresh: true,
+          refreshPriority: 2,
+          onUpdate: (self) => setPlatformState(self.progress),
+          onLeave: () => setPlatformState(1),
+          onEnterBack: (self) => setPlatformState(self.progress),
+        });
+      } else if (platform) {
+        platform.style.setProperty("--platform-main", "1");
+        platform.style.setProperty("--platform-branch", "1");
+        platform.style.setProperty("--platform-drop", "1");
+        platformCards.forEach((card) => card.setAttribute("data-active", ""));
       }
 
       const relationship = root.querySelector<HTMLElement>("[data-relationship]");
-      if (relationship) {
-        gsap.fromTo(
-          relationship,
-          { "--relationship-progress": 0 },
-          {
-            "--relationship-progress": 1,
-            ease: "none",
-            scrollTrigger: {
-              trigger: relationship,
-              start: "top 76%",
-              end: "bottom 35%",
-              scrub: 1,
-            },
-          },
-        );
+      const relationshipPin = root.querySelector<HTMLElement>("[data-relationship-pin]");
+      const relationshipPaths = gsap.utils.toArray<SVGPathElement>("[data-relationship-path]");
+      relationshipPaths.forEach((path) => {
+        const length = path.getTotalLength();
+        path.dataset.pathLength = String(length);
+        gsap.set(path, { strokeDasharray: length, strokeDashoffset: length });
+      });
+
+      if (relationship && relationshipPin && !compactViewport) {
+        const setRelationshipState = (progress: number) => {
+          relationship.style.setProperty("--relationship-progress", String(progress));
+          relationshipPaths.forEach((path) => {
+            const length = Number(path.dataset.pathLength || 0);
+            gsap.set(path, { strokeDashoffset: length * (1 - progress) });
+          });
+        };
+
+        setRelationshipState(0);
+        ScrollTrigger.create({
+          trigger: relationshipPin,
+          start: "top 12%",
+          end: () => `+=${Math.max(window.innerHeight * 2.25, 1700)}`,
+          pin: relationshipPin,
+          pinSpacing: true,
+          scrub: 0.85,
+          invalidateOnRefresh: true,
+          refreshPriority: 2,
+          onUpdate: (self) => setRelationshipState(self.progress),
+          onLeave: () => setRelationshipState(1),
+          onEnterBack: (self) => setRelationshipState(self.progress),
+        });
+      } else if (relationship) {
+        relationship.style.setProperty("--relationship-progress", "1");
+        relationshipPaths.forEach((path) => gsap.set(path, { strokeDashoffset: 0 }));
       }
+
+      document.fonts?.ready.then(() => ScrollTrigger.refresh());
+      ScrollTrigger.refresh();
     }, root);
 
-    return () => {
-      context.revert();
-      ScrollTrigger.getAll().forEach((trigger) => {
-        const triggerElement = trigger.trigger;
-        if (triggerElement instanceof Element && root.contains(triggerElement)) trigger.kill();
-      });
-    };
+    return () => context.revert();
   }, [rootRef]);
 }
 
 export default function CubeIQPage() {
   const rootRef = useRef<HTMLDivElement>(null);
-  const [activeTool, setActiveTool] = useState(0);
   const [activeAudience, setActiveAudience] = useState(audienceOptions[0].id);
   useCubeIQMotion(rootRef);
 
@@ -206,83 +315,88 @@ export default function CubeIQPage() {
     [activeAudience],
   );
 
-  const chooseTool = (index: number) => {
-    setActiveTool(index);
-    dispatchTool(index);
-  };
+  const firstRowTools = tools.slice(0, 8);
+  const secondRowTools = tools.slice(8, 16);
 
   return (
     <div id="cubeiq-page" ref={rootRef} className={styles.page}>
       <Navbar />
-      <CubeIQCanvas rootId="cubeiq-page" />
 
       <main className={styles.main}>
-        <section id="home" className={styles.hero} data-canvas-state="0">
+        <section id="home" className={styles.hero}>
           <div className={styles.heroGrid} aria-hidden="true" />
           <div className={styles.shell}>
-            <div className={styles.heroKicker} data-reveal>
-              <span>CubeIT builds the engine.</span>
-              <i />
-              <span>CubeIQ creates the momentum.</span>
-            </div>
+            <div className={styles.heroLayout}>
+              <div className={styles.heroCopy}>
+                <p className={styles.eyebrow} data-reveal><Sparkles aria-hidden="true" /> CubeIQ by CubeIT</p>
+                <AnimatedText as="h1" className={styles.heroTitle} mode="lines">
+                  {"Marketing that works\nas one growth system."}
+                </AnimatedText>
+                <p className={styles.heroLead} data-reveal>
+                  CubeIQ connects advertising, content, websites and customer follow-up so more people discover your business, trust it and take action.
+                </p>
+                <div className={styles.actions} data-reveal>
+                  <MagneticLink href="/contact?source=cubeiq" className={styles.primaryButton}>
+                    Grow with CubeIQ <ArrowUpRight aria-hidden="true" />
+                  </MagneticLink>
+                  <MagneticLink href="#growth-system" className={styles.secondaryButton}>
+                    See the system <ArrowDown aria-hidden="true" />
+                  </MagneticLink>
+                </div>
+              </div>
 
-            <div className={styles.heroHeadingWrap}>
-              <AnimatedText as="h1" className={styles.heroTitle} mode="lines">
-                {"Marketing that does more\nthan look busy."}
-              </AnimatedText>
-              <div className={styles.heroIndex} aria-hidden="true">IQ / 01</div>
-            </div>
-
-            <div className={styles.heroLower}>
-              <p className={styles.heroCopy} data-reveal>
-                CubeIQ connects strategy, creative, advertising, conversion, follow-up and technology into one growth system — so attention has somewhere useful to go.
-              </p>
-              <div className={styles.heroActions} data-reveal>
-                <MagneticLink href="/contact?source=cubeiq" className={styles.primaryButton}>
-                  Build my growth system <ArrowUpRight aria-hidden="true" />
-                </MagneticLink>
-                <MagneticLink href="#growth-engine" className={styles.textButton}>
-                  Explore how it works <ArrowDown aria-hidden="true" />
-                </MagneticLink>
+              <div className={styles.heroVisual} data-reveal aria-label="Connected growth strategy visual">
+                <div className={styles.strategyVisualFrame}>
+                  <div className={styles.strategyTopline}>
+                    <span>Live Growth Map</span>
+                    <strong>CubeIQ</strong>
+                  </div>
+                  <div className={styles.strategyCommandCenter}>
+                    <Image src="/brand/cubeit-logo.png" alt="" width={64} height={64} aria-hidden="true" />
+                    <div>
+                      <span>Connected by CubeIT</span>
+                      <strong>Strategy, creative, data and follow-up in one operating rhythm.</strong>
+                    </div>
+                  </div>
+                  <div className={styles.strategySignals} aria-hidden="true">
+                    {["Search intent", "Social demand", "Landing action", "CRM follow-up"].map((item, index) => (
+                      <span key={item} style={{ "--strategy-index": index } as CSSProperties}>{item}</span>
+                    ))}
+                  </div>
+                  <div className={styles.strategyMetricGrid} aria-hidden="true">
+                    {[
+                      ["Notice", "Audience clarity"],
+                      ["Trust", "Brand signal"],
+                      ["Action", "Conversion path"],
+                      ["Return", "Reconnection"],
+                    ].map(([label, value]) => (
+                      <article key={label}>
+                        <span>{label}</span>
+                        <strong>{value}</strong>
+                      </article>
+                    ))}
+                  </div>
+                  <div className={styles.strategyAutomationRail} aria-hidden="true">
+                    {["Ad", "Page", "Lead", "Reply", "Learn"].map((item) => <span key={item}>{item}</span>)}
+                  </div>
+                </div>
               </div>
             </div>
 
-            <div className={styles.heroSystem} data-reveal>
-              {[
-                ["01", "Strategy"], ["02", "Creative"], ["03", "Campaigns"],
-                ["04", "Conversion"], ["05", "Follow-up"], ["06", "Scale"],
-              ].map(([number, label]) => (
-                <div key={number}>
-                  <span>{number}</span>
-                  <strong>{label}</strong>
-                </div>
+            <div className={styles.heroBar} data-reveal>
+              {["Attract", "Engage", "Convert", "Reconnect", "Retain", "Scale"].map((item, index) => (
+                <span key={item}><i>{String(index + 1).padStart(2, "0")}</i>{item}</span>
               ))}
             </div>
           </div>
-          <div className={styles.heroMedia} aria-hidden="true">
-            <Image
-              src="/cubeiq-assets/campaign-creators-pypeCEaJeZY-unsplash.jpg"
-              alt=""
-              width={760}
-              height={520}
-              priority
-              sizes="(max-width: 760px) 48vw, 30vw"
-            />
-            <span>Attention</span>
-          </div>
-          <div className={styles.scrollCue} aria-hidden="true"><MousePointer2 /><span>Scroll to connect the system</span></div>
         </section>
 
-        <section className={styles.problem} data-canvas-state="1">
+        <section className={styles.problem}>
           <div className={styles.shell}>
-            <div className={styles.sectionIntro}>
-              <p className={styles.eyebrow}>The real growth problem</p>
-              <AnimatedText as="h2" className={styles.displayHeading} mode="lines">
-                {"Most businesses do not need\nmore disconnected activity."}
-              </AnimatedText>
-              <p data-reveal>
-                Ads, content, websites, sales teams and reporting can all be active while the customer journey between them remains broken.
-              </p>
+            <div className={styles.sectionHeader}>
+              <p className={styles.eyebrow}>The problem</p>
+              <h2>Running ads is easy. Building growth is harder.</h2>
+              <p>Many businesses have activity everywhere, but the customer journey between those activities is weak.</p>
             </div>
 
             <div className={styles.brokenSystem} data-system-track>
@@ -317,45 +431,14 @@ export default function CubeIQPage() {
 
             <div className={styles.problemResolution} data-reveal>
               <Network aria-hidden="true" />
-              <p><strong>CubeIQ connects the journey.</strong> We improve the handoff between attention, action, follow-up and learning — because growth is usually lost between the tools, not inside one channel.</p>
-              <Link href="#services" className={styles.inlineLink}>See the connected services <ArrowRight aria-hidden="true" /></Link>
+              <p><strong>CubeIQ connects the journey.</strong> Growth is usually lost between tools, teams and handoffs. We make attention, action, follow-up and learning work as one path.</p>
+              <Link href="#services" className={styles.inlineLink}>See connected services <ArrowRight aria-hidden="true" /></Link>
             </div>
           </div>
         </section>
 
-        <section id="services" className={styles.layers} data-canvas-state="2">
-          <div className={styles.shell}>
-            <div className={styles.layersHeader}>
-              <p className={styles.eyebrow}>What CubeIQ actually does</p>
-              <AnimatedText as="h2" className={styles.displayHeading} mode="lines">
-                {"One growth partner.\nSix connected outcomes."}
-              </AnimatedText>
-            </div>
-
-            <div className={styles.layerList}>
-              {growthLayers.map((layer, index) => (
-                <article className={styles.layerRow} key={layer.id} data-reveal>
-                  <div className={styles.layerNumber}>{String(index + 1).padStart(2, "0")}</div>
-                  <div className={styles.layerMain}>
-                    <p>{layer.label}</p>
-                    <h3>{layer.title}</h3>
-                    <span>{layer.summary}</span>
-                  </div>
-                  <div className={styles.layerServices}>
-                    {layer.services.map((service) => <span key={service}>{service}</span>)}
-                  </div>
-                  <div className={styles.layerOutcome}>
-                    <small>Business outcome</small>
-                    <p>{layer.outcome}</p>
-                  </div>
-                </article>
-              ))}
-            </div>
-          </div>
-        </section>
-
-        <section id="growth-engine" className={styles.engine} data-canvas-state="2">
-          <div className={styles.engineSticky}>
+        <section id="growth-system" className={styles.engine} data-engine-section>
+          <div className={styles.engineSticky} data-engine-pin>
             <div className={styles.shell}>
               <div className={styles.engineHeader}>
                 <p className={styles.eyebrow}>The CubeIQ growth engine</p>
@@ -364,104 +447,96 @@ export default function CubeIQPage() {
               <div className={styles.engineVisual} aria-hidden="true">
                 <svg viewBox="0 0 700 700">
                   <circle className={styles.engineOrbitGhost} cx="350" cy="350" r="230" />
-                  <circle data-draw-path className={styles.engineOrbit} cx="350" cy="350" r="230" />
-                  <path data-draw-path className={styles.engineSpiral} d="M350 76 C572 82 635 301 510 444 C397 574 181 522 150 356 C123 211 244 154 351 207 C444 252 459 373 389 422 C333 461 257 428 249 363 C243 311 283 284 326 296" />
+                  <circle data-engine-path className={styles.engineOrbit} cx="350" cy="350" r="230" />
+                  <path data-engine-path className={styles.engineSpiral} d="M350 76 C572 82 635 301 510 444 C397 574 181 522 150 356 C123 211 244 154 351 207 C444 252 459 373 389 422 C333 461 257 428 249 363 C243 311 283 284 326 296" />
                   <rect x="286" y="286" width="128" height="128" rx="18" className={styles.engineCore} />
                   <path d="M305 333 L350 307 L395 333 L350 359 Z M305 333 V382 L350 409 V359 M395 333 V382 L350 409" className={styles.engineCube} />
                 </svg>
                 <div className={styles.engineWords}>
-                  {engineSteps.map(([title], index) => <span data-engine-word key={title} style={{ "--engine-word-index": index } as CSSProperties}>{title}</span>)}
+                  {engineSteps.map(([title], index) => (
+                    <span data-engine-word key={title} style={{ "--engine-word-index": index } as CSSProperties}>{title}</span>
+                  ))}
                 </div>
               </div>
             </div>
-          </div>
 
-          <div className={styles.engineSteps}>
-            {engineSteps.map(([title, description], index) => (
-              <article key={title} data-engine-step>
-                <span>{String(index + 1).padStart(2, "0")}</span>
-                <h3>{title}</h3>
-                <p>{description}</p>
-              </article>
-            ))}
+            <div className={styles.engineSteps}>
+              {engineSteps.map(([title, description], index) => (
+                <article key={title} data-engine-step>
+                  <span>{String(index + 1).padStart(2, "0")}</span>
+                  <h3>{title}</h3>
+                  <p>{description}</p>
+                </article>
+              ))}
+            </div>
           </div>
         </section>
 
-        <section className={styles.toolsSection} data-canvas-state="2">
+        <section id="services" className={styles.capabilities}>
           <div className={styles.shell}>
-            <div className={styles.toolsIntro}>
-              <p className={styles.eyebrow}>Platforms inside the system</p>
-              <AnimatedText as="h2" className={styles.displayHeading} mode="lines">
-                {"Not more tools.\nBetter connections between them."}
-              </AnimatedText>
-              <p data-reveal>
-                Every platform has a specific job. CubeIQ chooses the useful combination, connects the data and makes the handoffs clear.
-              </p>
+            <div className={styles.sectionHeader}>
+              <p className={styles.eyebrow}>What CubeIQ does</p>
+              <h2>Six services. One connected customer journey.</h2>
+              <p>CubeIQ does not treat marketing as isolated tasks. Each service supports the next business outcome.</p>
             </div>
 
-            <div className={styles.toolNetwork}>
-              <div className={styles.toolOrbit} aria-hidden="true">
-                <svg viewBox="0 0 680 680">
-                  <circle cx="340" cy="340" r="245" />
-                  <circle cx="340" cy="340" r="158" />
-                  <path data-draw-path d="M95 340 C190 205 270 480 340 340 S500 160 585 340" />
-                  <path data-draw-path d="M340 95 C205 190 480 270 340 340 S160 500 340 585" />
-                </svg>
-                <div className={styles.toolCore}><span>Cube</span><strong>IQ</strong><small>Connected growth</small></div>
-              </div>
+            <div className={styles.capabilityGrid}>
+              {capabilityCards.map(([title, copy], index) => (
+                <article key={title} data-reveal>
+                  <span>{String(index + 1).padStart(2, "0")}</span>
+                  <h3>{title}</h3>
+                  <p>{copy}</p>
+                </article>
+              ))}
+            </div>
+          </div>
+        </section>
 
-              <div className={styles.toolNodes}>
-                {tools.map((tool, index) => (
-                  <button
-                    type="button"
-                    key={tool.id}
-                    className={activeTool === index ? styles.toolActive : undefined}
-                    style={{ "--tool-index": index, "--tool-count": tools.length } as CSSProperties}
-                    onMouseEnter={() => chooseTool(index)}
-                    onFocus={() => chooseTool(index)}
-                    onClick={() => chooseTool(index)}
-                    aria-pressed={activeTool === index}
-                  >
-                    <img src={tool.icon} alt="" aria-hidden="true" />
-                    <span>{tool.name}</span>
-                  </button>
+        <section className={styles.bridge} data-bridge>
+          <div className={styles.shell}>
+            <div className={styles.bridgeHeader}>
+              <p className={styles.eyebrow}>The CubeIQ difference</p>
+              <h2>Most agencies stop at the ad. We look at what happens next.</h2>
+            </div>
+            <div className={styles.bridgeLayout} data-bridge-pin>
+              <div className={styles.bridgeFlow} aria-hidden="true">
+                {["Ad", "Page", "Enquiry", "Follow-up", "Customer"].map((item, index) => (
+                  <span key={item} data-bridge-step style={{ "--bridge-index": index } as CSSProperties}>{item}</span>
                 ))}
               </div>
-
-              <div className={styles.toolExplanation} data-reveal>
-                <div className={styles.toolExplanationTop}>
-                  <img src={tools[activeTool].icon} alt="" aria-hidden="true" />
-                  <div><span>{tools[activeTool].name}</span><strong>{tools[activeTool].role}</strong></div>
-                </div>
-                <p>{tools[activeTool].why}</p>
-                <small>Its value increases when the next step — page, CRM, follow-up or measurement — is connected.</small>
+              <div className={styles.differenceList}>
+                {difference.map(([before, after]) => (
+                  <article key={before} data-difference-item>
+                    <p>{before}</p>
+                    <ArrowRight aria-hidden="true" />
+                    <strong>{after}</strong>
+                  </article>
+                ))}
               </div>
             </div>
           </div>
         </section>
 
-        <section className={styles.relationship} data-canvas-state="3" data-relationship>
+        <section className={styles.relationship} data-relationship>
           <div className={styles.relationshipBackdrop} aria-hidden="true" />
           <div className={styles.shell}>
             <div className={styles.relationshipIntro}>
               <p className={styles.eyebrow}>Why CubeIT created CubeIQ</p>
-              <AnimatedText as="h2" className={styles.relationshipTitle} mode="lines">
-                {"The engine and the momentum\nshould know each other."}
-              </AnimatedText>
+              <h2 className={styles.relationshipTitle}>The engine and the momentum should know each other.</h2>
             </div>
 
-            <div className={styles.relationshipSystem}>
+            <div className={styles.relationshipSystem} data-relationship-pin>
               <div className={styles.relationshipSide} data-reveal>
                 <span>CubeIT</span>
                 <h3>Builds the digital infrastructure.</h3>
-                <p>Websites, applications, business systems, CRM, automation, AI, integrations, portals and analytics infrastructure.</p>
+                <p>Websites, applications, CRM, automation, AI, integrations, portals and analytics infrastructure.</p>
                 <div>{["System", "Experience", "Data", "Automation"].map((item) => <em key={item}>{item}</em>)}</div>
               </div>
 
               <div className={styles.relationshipCenter} aria-hidden="true">
                 <svg viewBox="0 0 420 650">
-                  <path data-draw-path d="M210 30 V170 C210 220 120 230 120 310 C120 390 210 390 210 470 V620" />
-                  <path data-draw-path d="M210 170 C210 220 300 230 300 310 C300 390 210 390 210 470" />
+                  <path data-relationship-path d="M210 30 V170 C210 220 120 230 120 310 C120 390 210 390 210 470 V620" />
+                  <path data-relationship-path d="M210 170 C210 220 300 230 300 310 C300 390 210 390 210 470" />
                   <path d="M149 281 L210 246 L271 281 L210 317 Z M149 281 V350 L210 386 V317 M271 281 V350 L210 386" />
                 </svg>
                 <span>Idea</span><span>System</span><span>Attention</span><span>Lead</span><span>Customer</span><span>Scale</span>
@@ -476,54 +551,19 @@ export default function CubeIQPage() {
             </div>
 
             <blockquote data-reveal>
-              Most agencies can run a campaign but cannot repair the system behind it. Most software teams can build a platform but do not own the demand entering it. <strong>CubeIT and CubeIQ solve both sides.</strong>
+              CubeIQ improves demand while CubeIT can strengthen the system behind it. <strong>That is the advantage.</strong>
             </blockquote>
           </div>
         </section>
 
-        <section className={styles.comparison} data-canvas-state="3">
+        <section className={styles.method}>
           <div className={styles.shell}>
-            <div className={styles.sectionIntroCompact}>
-              <p className={styles.eyebrow}>A different agency model</p>
-              <h2>Where traditional delivery loses the signal, CubeIQ keeps the journey intact.</h2>
-            </div>
-
-            <div className={styles.comparisonFlow}>
-              <div className={styles.flowLane} data-reveal>
-                <div className={styles.flowHeading}><span>Fragmented model</span><small>Signals disappear between vendors.</small></div>
-                <div className={styles.flowNodes}>
-                  {[
-                    ["Agency", "Reports clicks"], ["Designer", "Delivers assets"], ["Developer", "Waits for a brief"], ["Sales", "Chases leads manually"],
-                  ].map(([title, detail], index) => (
-                    <div key={title}><i className={index > 1 ? styles.flowBroken : undefined} /><strong>{title}</strong><span>{detail}</span></div>
-                  ))}
-                </div>
-              </div>
-              <div className={`${styles.flowLane} ${styles.flowLaneConnected}`} data-reveal>
-                <div className={styles.flowHeading}><span>CubeIQ connected model</span><small>One strategy, one learning loop.</small></div>
-                <div className={styles.flowNodes}>
-                  {[
-                    ["Strategy", "Sets the commercial direction"], ["Creative", "Builds the message"], ["Technology", "Supports the journey"], ["Growth", "Learns and improves"],
-                  ].map(([title, detail]) => (
-                    <div key={title}><i /><strong>{title}</strong><span>{detail}</span></div>
-                  ))}
-                </div>
-              </div>
-            </div>
-          </div>
-        </section>
-
-        <section className={styles.method} data-canvas-state="3">
-          <div className={styles.shell}>
-            <div className={styles.methodHeading}>
-              <p className={styles.eyebrow}>The CubeIQ method</p>
-              <AnimatedText as="h2" className={styles.displayHeading} mode="lines">
-                {"Launch with intent.\nImprove with evidence."}
-              </AnimatedText>
-              <p data-reveal>We do not launch something once and hope. Each phase creates the evidence needed for the next one.</p>
+            <div className={styles.sectionHeader}>
+              <p className={styles.eyebrow}>How we work</p>
+              <h2>Test, learn, improve and scale what proves useful.</h2>
             </div>
             <div className={styles.methodTrack}>
-              {methodSteps.map((step) => (
+              {methodSteps.slice(0, 5).map((step) => (
                 <article key={step.number} data-reveal>
                   <span>{step.number}</span>
                   <h3>{step.title}</h3>
@@ -534,124 +574,128 @@ export default function CubeIQPage() {
           </div>
         </section>
 
-        <section className={styles.clientExperience} data-canvas-state="3">
+        <section className={styles.toolsSection} data-platform-section>
           <div className={styles.shell}>
-            <div className={styles.experienceGrid}>
-              <div className={styles.experienceStatement}>
-                <p className={styles.eyebrow}>What working with CubeIQ feels like</p>
-                <h2>Clear priorities.<br />Visible decisions.<br /><span>No mystery work.</span></h2>
-                <p>Serious growth work should make the business easier to understand, not bury the team under another dashboard.</p>
+            <div className={styles.sectionHeader}>
+              <p className={styles.eyebrow}>Connected platforms</p>
+              <h2>Useful tools, connected with a clear purpose.</h2>
+            </div>
+            <div className={styles.platformNetwork} data-platform-pin>
+              <div className={styles.platformHub}>
+                <Image src="/brand/cubeit-logo.png" alt="CubeIT" width={86} height={86} priority={false} />
+                <span>Central system</span>
               </div>
-              <div className={styles.deliverableList}>
-                {deliverables.map(([title, description], index) => (
-                  <article key={title} data-reveal>
-                    <span>{String(index + 1).padStart(2, "0")}</span>
-                    <div><h3>{title}</h3><p>{description}</p></div>
-                    <Check aria-hidden="true" />
-                  </article>
+
+              <div className={styles.platformLineLayer} aria-hidden="true">
+                <span className={styles.platformStem} />
+                <span className={styles.platformRail} />
+                {Array.from({ length: 8 }).map((_, index) => (
+                  <span
+                    key={`branch-${index}`}
+                    className={styles.platformBranch}
+                    style={{ "--platform-line-left": `${(index + 0.5) * 12.5}%` } as CSSProperties}
+                  />
+                ))}
+                {Array.from({ length: 8 }).map((_, index) => (
+                  <span
+                    key={`drop-${index}`}
+                    className={styles.platformDrop}
+                    style={{ "--platform-line-left": `${(index + 0.5) * 12.5}%` } as CSSProperties}
+                  />
                 ))}
               </div>
-            </div>
-          </div>
-        </section>
 
-        <section className={styles.proof} data-canvas-state="3">
-          <div className={styles.shell}>
-            <div className={styles.proofHeading}>
-              <p className={styles.eyebrow}>Proof without performance theatre</p>
-              <h2>We show the movement that matters — and the decision it creates.</h2>
-              <p>No invented logos, vanity awards or anonymous revenue claims. Until approved case studies are added, this section explains the evidence CubeIQ is designed to surface.</p>
-            </div>
-            <div className={styles.proofSignals}>
-              {proofSignals.map(([title, description], index) => (
-                <article key={title} data-reveal>
-                  <span>0{index + 1}</span>
-                  {index === 0 && <Target aria-hidden="true" />}
-                  {index === 1 && <Gauge aria-hidden="true" />}
-                  {index === 2 && <MessageCircleMore aria-hidden="true" />}
-                  {index === 3 && <LineChart aria-hidden="true" />}
-                  <h3>{title}</h3>
-                  <p>{description}</p>
-                </article>
-              ))}
-            </div>
-            <div className={styles.exampleScenario} data-reveal>
-              <span>Illustrative scenario — not a client claim</span>
-              <p><strong>Before:</strong> Campaigns generate enquiries, but response time and lead ownership are unclear.</p>
-              <ArrowRight aria-hidden="true" />
-              <p><strong>CubeIQ focus:</strong> Connect campaign source, landing-page action, CRM assignment and WhatsApp follow-up into one measurable path.</p>
-            </div>
-          </div>
-        </section>
-
-        <section className={styles.audience} data-canvas-state="3">
-          <div className={styles.shell}>
-            <div className={styles.audienceHeading}>
-              <p className={styles.eyebrow}>Is CubeIQ relevant to your situation?</p>
-              <h2>Choose the problem that sounds most familiar.</h2>
-            </div>
-            <div className={styles.audienceSelector}>
-              <div className={styles.audienceOptions} role="tablist" aria-label="Business growth situations">
-                {audienceOptions.map((option, index) => (
-                  <button
-                    type="button"
-                    key={option.id}
-                    role="tab"
-                    aria-selected={activeAudience === option.id}
-                    onClick={() => setActiveAudience(option.id)}
-                  >
-                    <span>0{index + 1}</span>{option.label}<ChevronRight aria-hidden="true" />
-                  </button>
-                ))}
-              </div>
-              <div className={styles.audienceResponse} role="tabpanel" key={audience.id}>
-                <CircleDot aria-hidden="true" />
-                <p className={styles.eyebrow}>How CubeIQ would think about it</p>
-                <h3>{audience.title}</h3>
-                <p>{audience.body}</p>
-                <Link href="#diagnostic" className={styles.inlineLink}>Diagnose my growth gaps <ArrowRight aria-hidden="true" /></Link>
+              <div className={styles.platformRows}>
+                <div className={styles.platformRow}>
+                  {firstRowTools.map((tool, index) => (
+                    <article key={tool.id} className={styles.platformCard} data-platform-card data-row="1" data-accent={tool.accent} style={{ "--platform-card-index": index } as CSSProperties}>
+                      <Image src={tool.icon} alt="" width={34} height={34} aria-hidden="true" />
+                      <span>{tool.name}</span>
+                    </article>
+                  ))}
+                </div>
+                <div className={styles.platformRow}>
+                  {secondRowTools.map((tool, index) => (
+                    <article key={tool.id} className={styles.platformCard} data-platform-card data-row="2" data-accent={tool.accent} style={{ "--platform-card-index": index + 8 } as CSSProperties}>
+                      <Image src={tool.icon} alt="" width={34} height={34} aria-hidden="true" />
+                      <span>{tool.name}</span>
+                    </article>
+                  ))}
+                </div>
               </div>
             </div>
           </div>
         </section>
 
-        <section id="diagnostic" className={styles.diagnosticSection} data-canvas-state="4">
+        <section className={styles.audience}>
           <div className={styles.shell}>
-            <div className={styles.diagnosticIntro}>
-              <p className={styles.eyebrow}>Start with clarity</p>
-              <AnimatedText as="h2" className={styles.displayHeading} mode="lines">
-                {"Find the first growth gap\nbefore buying more activity."}
-              </AnimatedText>
-              <p data-reveal>Answer four simple questions. The summary gives your team a useful starting direction and carries the context into the existing CubeIT contact flow.</p>
+            <div className={styles.audienceLayout}>
+              <div>
+                <p className={styles.eyebrow}>Is CubeIQ relevant?</p>
+                <h2>Choose the situation that sounds familiar.</h2>
+              </div>
+              <div className={styles.audiencePanel}>
+                <div className={styles.audienceOptions} role="tablist" aria-label="Business growth situations">
+                  {audienceOptions.map((option, index) => (
+                    <button
+                      type="button"
+                      key={option.id}
+                      role="tab"
+                      aria-selected={activeAudience === option.id}
+                      onClick={() => setActiveAudience(option.id)}
+                    >
+                      <span>{String(index + 1).padStart(2, "0")}</span>{option.label}
+                    </button>
+                  ))}
+                </div>
+                <div className={styles.audienceResponse} role="tabpanel" key={audience.id}>
+                  <CircleDot aria-hidden="true" />
+                  <h3>{audience.title}</h3>
+                  <p>{audience.body}</p>
+                </div>
+              </div>
             </div>
-            <GrowthDiagnostic />
           </div>
         </section>
 
-        <section className={styles.finalCta} data-canvas-state="4">
-          <div className={styles.finalGrid} aria-hidden="true" />
+        <section id="diagnostic" className={styles.diagnosticSection}>
           <div className={styles.shell}>
-            <div className={styles.finalTopline} data-reveal>
-              <span>Strategy</span><i /><span>Creative</span><i /><span>Campaigns</span><i /><span>Conversion</span><i /><span>Technology</span>
+            <div className={styles.diagnosticLayout}>
+              <div>
+                <p className={styles.eyebrow}>Start with clarity</p>
+                <h2>Find the first growth gap before buying more activity.</h2>
+                <p>Answer four simple questions. The summary gives your team a useful starting direction and carries the context into the CubeIT contact flow.</p>
+              </div>
+              <GrowthDiagnostic />
             </div>
-            <AnimatedText as="h2" className={styles.finalTitle} mode="lines">
-              {"You do not need more disconnected marketing.\nYou need a growth system that knows where it is going."}
-            </AnimatedText>
-            <p data-reveal>Tell us where the business is today. CubeIQ will help identify what should happen next — and CubeIT can build the technology required to support it.</p>
-            <div className={styles.finalActions} data-reveal>
-              <MagneticLink href="/contact?source=cubeiq-final" className={styles.finalPrimary}>
-                Build my growth system <ArrowUpRight aria-hidden="true" />
-              </MagneticLink>
-              <MagneticLink href="/contact?source=cubeiq-conversation" className={styles.finalSecondary}>
-                Talk to CubeIQ <MessageCircleMore aria-hidden="true" />
-              </MagneticLink>
-            </div>
-            <div className={styles.finalSeal} aria-hidden="true">
-              <Workflow /><span>CubeIT</span><i /><strong>CubeIQ</strong><small>One connected partner</small>
+          </div>
+        </section>
+
+        <section className={styles.finalCta}>
+          <div className={styles.shell}>
+            <div className={styles.finalPanel} data-reveal>
+              <div>
+                <p className={styles.eyebrow}>Build your growth system</p>
+                <h2>You do not need more disconnected marketing.</h2>
+                <p>Tell us where your business is today. CubeIQ will help identify what should happen next.</p>
+              </div>
+              <div className={styles.finalActions}>
+                <MagneticLink href="/contact?source=cubeiq-final" className={styles.primaryButton}>
+                  Build your growth system <ArrowUpRight aria-hidden="true" />
+                </MagneticLink>
+                <Link href="/contact?source=cubeiq-conversation" className={styles.textLink}>
+                  Talk to CubeIQ <MessageCircleMore aria-hidden="true" />
+                </Link>
+              </div>
+              <div className={styles.finalSeal} aria-hidden="true">
+                <Target /><Zap /><Check />
+              </div>
             </div>
           </div>
         </section>
       </main>
+
+      <Footer />
     </div>
   );
 }

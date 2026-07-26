@@ -3,7 +3,7 @@
 import dynamic from "next/dynamic";
 import Image from "next/image";
 import { useEffect, useMemo, useRef, useState, type CSSProperties, type PointerEvent } from "react";
-import { ArrowRight, ArrowUpRight, CheckCircle2, Layers3, MoveRight, Sparkles } from "lucide-react";
+import { ArrowRight, ArrowUpRight, CheckCircle2, MoveRight, Sparkles } from "lucide-react";
 import { useReducedMotion } from "motion/react";
 import { CursorFill } from "@/components/motion/cursor-fill";
 import { Footer, Navbar } from "@/components/cubeit-site";
@@ -19,6 +19,18 @@ type HorizontalPanel =
   | { type: "visual"; service: CubeITService; image: string }
   | { type: "major"; service: CubeITService }
   | { type: "narrow"; service: CubeITService };
+
+const ctaLogos = [
+  { name: "Next.js", src: "/logos/nextdotjs.svg", type: "Product" },
+  { name: "React", src: "/logos/react.svg", type: "Interface" },
+  { name: "Node.js", src: "/logos/nodedotjs.svg", type: "Backend" },
+  { name: "Postgres", src: "/logos/postgresql.svg", type: "Data" },
+  { name: "Python", src: "/logos/python.svg", type: "AI" },
+  { name: "Docker", src: "/logos/docker.svg", type: "Deploy" },
+  { name: "Google Ads", src: "/cubeiq-assets/logos/googleads.svg", type: "Growth" },
+  { name: "HubSpot", src: "/cubeiq-assets/logos/hubspot.svg", type: "CRM" },
+  { name: "WhatsApp", src: "/cubeiq-assets/logos/whatsapp.svg", type: "Connect" },
+];
 
 function ServiceMedia({ service, image, priority = false }: { service: CubeITService; image: string; priority?: boolean }) {
   return (
@@ -74,7 +86,7 @@ function HorizontalPanelView({ panel, index }: { panel: HorizontalPanel; index: 
 
 export default function ServicesPage() {
   const reducedMotion = Boolean(useReducedMotion());
-  const [desktop3D, setDesktop3D] = useState(false);
+  const [widePointer, setWidePointer] = useState(false);
   const [selectedIndex, setSelectedIndex] = useState(0);
   const introRef = useRef<HTMLElement>(null);
   const storyRef = useRef<HTMLElement>(null);
@@ -91,11 +103,11 @@ export default function ServicesPage() {
     horizontalViewportRef,
     horizontalTrackRef,
     selectorRef,
-    reducedMotion: reducedMotion || !desktop3D,
+    reducedMotion,
   });
 
   useEffect(() => {
-    const update = () => setDesktop3D(window.innerWidth >= 900);
+    const update = () => setWidePointer(window.innerWidth >= 900);
     update();
     window.addEventListener("resize", update, { passive: true });
     return () => window.removeEventListener("resize", update);
@@ -113,7 +125,7 @@ export default function ServicesPage() {
   const selectedService = cubeitServices[selectedIndex] ?? cubeitServices[0];
 
   const handlePointerMove = (event: PointerEvent<HTMLElement>) => {
-    if (reducedMotion || !desktop3D) return;
+    if (reducedMotion || !widePointer) return;
     const rect = immersiveRef.current?.getBoundingClientRect();
     if (!rect) return;
     setPointer(
@@ -132,9 +144,9 @@ export default function ServicesPage() {
           <div className={styles.heroGrid} aria-hidden="true" />
           <div className={styles.heroCopy}>
             <span className={styles.eyebrow}><Sparkles aria-hidden="true" /> CubeIT Services</span>
-            <h1 id="services-title">Services built like intelligent systems.</h1>
+            <h1 id="services-title">Software services built as one system.</h1>
             <p>
-              CubeIT combines AI, software engineering, automation and product design so modern businesses can move from scattered work to one scalable operating layer.
+              We combine AI, product design, automation and engineering so your business runs on cleaner, smarter software.
             </p>
             <div className="section-actions">
               <a className="btn btn-primary" href="/contact">Start a project <ArrowUpRight aria-hidden="true" /></a>
@@ -153,8 +165,8 @@ export default function ServicesPage() {
 
         <section className={styles.introGrid} id="services" aria-labelledby="service-principles-title">
           <div className={styles.sectionLead}>
-            <span className={styles.eyebrow}>How we think</span>
-            <h2 id="service-principles-title">The service is not a list. It is a connected delivery system.</h2>
+            <span className={styles.eyebrow}>Our approach</span>
+            <h2 id="service-principles-title">Every service is shaped around the work it needs to improve.</h2>
           </div>
           <div className={styles.principleGrid}>
             {servicePrinciples.map((principle, index) => (
@@ -173,7 +185,7 @@ export default function ServicesPage() {
           onPointerMove={handlePointerMove}
           onPointerLeave={() => setPointer(0, 0)}
         >
-          {!reducedMotion && desktop3D ? (
+          {!reducedMotion ? (
             <div className={styles.canvasStage} aria-hidden="true">
               <ServicesCanvas timelineRef={timelineRef} selectedIndex={selectedIndex} reducedMotion={reducedMotion} />
             </div>
@@ -181,20 +193,20 @@ export default function ServicesPage() {
 
           <section ref={introRef} className={styles.immersiveIntro} aria-labelledby="immersive-title">
             <div className={styles.immersiveLeft}>
-              <span className={styles.eyebrow}>Immersive service system</span>
-              <h2 id="immersive-title">The cube is the model: strategy, product and engineering locked together.</h2>
+              <span className={styles.eyebrow}>Connected delivery</span>
+              <h2 id="immersive-title">Strategy, product and engineering move together.</h2>
             </div>
             <div className={styles.immersiveRight}>
               <p>
-                Each service exposes a different face of the same CubeIT operating method. The scroll story keeps the object anchored while the business context moves around it.
+                The cube represents how CubeIT works: every capability connects back to one delivery system.
               </p>
             </div>
           </section>
 
           <section ref={storyRef} className={styles.storySection} id="service-story" aria-labelledby="story-title">
             <div className={styles.storyHeading}>
-              <span className={styles.eyebrow}>Sticky 3D service story</span>
-              <h2 id="story-title">Every capability rotates around the same delivery core.</h2>
+              <span className={styles.eyebrow}>Core capabilities</span>
+              <h2 id="story-title">Choose the capability your business needs first.</h2>
             </div>
             <div className={styles.storyRows}>
               {cubeitServices.map((service, index) => (
@@ -218,8 +230,8 @@ export default function ServicesPage() {
           >
             <div ref={horizontalViewportRef} className={styles.horizontalViewport}>
               <div className={styles.horizontalHeader}>
-                <span className={styles.eyebrow}>Kinetic service wall</span>
-                <h2 id="horizontal-title">A horizontal exhibition pulled by vertical scroll.</h2>
+                <span className={styles.eyebrow}>Service gallery</span>
+                <h2 id="horizontal-title">A clearer view of what CubeIT can build.</h2>
               </div>
               <div ref={horizontalTrackRef} className={styles.horizontalTrack}>
                 {horizontalPanels.map((panel, index) => (
@@ -230,8 +242,8 @@ export default function ServicesPage() {
           </section>
 
           <section ref={selectorRef} className={styles.selectorSection} aria-labelledby="selector-title">
-            <span className={styles.eyebrow}>Choose a capability</span>
-            <h2 id="selector-title">Select the face of CubeIT your business needs first.</h2>
+            <span className={styles.eyebrow}>Capability focus</span>
+            <h2 id="selector-title">Start with one need. We connect the rest.</h2>
             <div className={styles.selectorButtons} role="tablist" aria-label="CubeIT service selector">
               {cubeitServices.map((service, index) => (
                 <button
@@ -263,8 +275,18 @@ export default function ServicesPage() {
 
         <section className={styles.matrixSection} aria-labelledby="matrix-title">
           <div className={styles.sectionLead}>
-            <span className={styles.eyebrow}>Delivery matrix</span>
-            <h2 id="matrix-title">The supporting structure behind the service.</h2>
+            <span className={styles.eyebrow}>How delivery works</span>
+            <h2 id="matrix-title">A simple structure from idea to launch.</h2>
+            {!reducedMotion ? (
+              <div className={styles.deliveryCubeDock} aria-hidden="true">
+                <ServicesCanvas
+                  timelineRef={timelineRef}
+                  selectedIndex={selectedIndex}
+                  reducedMotion={reducedMotion}
+                  presentation="dock"
+                />
+              </div>
+            ) : null}
           </div>
           <div className={styles.matrixGrid}>
             {deliveryMatrix.map((column, index) => (
@@ -281,8 +303,8 @@ export default function ServicesPage() {
 
         <section className={styles.deepDiveSection} aria-labelledby="deep-dive-title">
           <div className={styles.deepDiveHead}>
-            <span className={styles.eyebrow}>Service deep dives</span>
-            <h2 id="deep-dive-title">Quiet detail after the kinetic system.</h2>
+            <span className={styles.eyebrow}>Service detail</span>
+            <h2 id="deep-dive-title">What each service includes.</h2>
           </div>
           {cubeitServices.map((service) => (
             <article className={styles.deepDiveRow} key={service.slug}>
@@ -304,21 +326,23 @@ export default function ServicesPage() {
         <section className={styles.ctaSection} aria-labelledby="services-cta-title">
           <div className={styles.ctaCopy}>
             <span className={styles.eyebrow}>Build with CubeIT</span>
-            <h2 id="services-cta-title">Bring the work into one intelligent system.</h2>
-            <p>Tell us what is scattered, slow or difficult to scale. We will help shape the service path that should happen next.</p>
+            <h2 id="services-cta-title">Turn scattered work into one intelligent system.</h2>
+            <p>Tell us what feels slow or difficult to scale. We will help shape the next step.</p>
             <a className="btn btn-primary" href="/contact">Start a project <ArrowRight aria-hidden="true" /></a>
           </div>
-          <div className={styles.ctaCubes} aria-hidden="true">
-            {Array.from({ length: 12 }).map((_, index) => (
+          <div className={styles.ctaLogoWall} aria-hidden="true">
+            <div className={styles.ctaLogoCore}>
+              <span>CubeIT</span>
+              <strong>Connected system</strong>
+            </div>
+            {ctaLogos.map((logo, index) => (
               <span
-                key={index}
-                style={{
-                  "--x": `${((index % 4) - 1.5) * 78}px`,
-                  "--y": `${(Math.floor(index / 4) - 1) * 82}px`,
-                  "--r": `${index * 13}deg`,
-                } as CSSProperties}
+                className={styles.ctaLogoTile}
+                key={logo.name}
+                style={{ "--delay": `${index * 35}ms` } as CSSProperties}
               >
-                <Layers3 />
+                <Image src={logo.src} alt="" width={30} height={30} />
+                <small>{logo.type}</small>
               </span>
             ))}
           </div>

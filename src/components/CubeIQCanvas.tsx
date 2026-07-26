@@ -139,8 +139,12 @@ export default function CubeIQCanvas({ rootId = "cubeiq-page" }: { rootId?: stri
 
     const reducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
     const smallDevice = window.matchMedia("(max-width: 760px)").matches;
+    const setModeSoon = (nextMode: "ready" | "fallback") => {
+      window.requestAnimationFrame(() => setMode(nextMode));
+    };
+
     if (reducedMotion) {
-      setMode("fallback");
+      setModeSoon("fallback");
       return;
     }
 
@@ -153,7 +157,7 @@ export default function CubeIQCanvas({ rootId = "cubeiq-page" }: { rootId?: stri
         powerPreference: smallDevice ? "default" : "high-performance",
       });
     } catch {
-      setMode("fallback");
+      setModeSoon("fallback");
       return;
     }
 
@@ -520,7 +524,7 @@ export default function CubeIQCanvas({ rootId = "cubeiq-page" }: { rootId?: stri
     };
 
     resize();
-    setMode("ready");
+    setModeSoon("ready");
     window.addEventListener("resize", resize, { passive: true });
     window.addEventListener("pointermove", onPointerMove, { passive: true });
     window.addEventListener("cubeiq:tool", onToolEvent as EventListener);

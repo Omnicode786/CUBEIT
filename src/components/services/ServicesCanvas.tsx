@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useMemo, useRef, type MutableRefObject } from "react";
-import { Canvas, useFrame, useThree } from "@react-three/fiber";
+import { Canvas, useFrame } from "@react-three/fiber";
 import { RoundedBox } from "@react-three/drei";
 import * as THREE from "three";
 import { cubeitServices } from "./services-data";
@@ -11,6 +11,7 @@ type ServicesCanvasProps = {
   timelineRef: MutableRefObject<ServicesTimelineState>;
   selectedIndex: number;
   reducedMotion: boolean;
+  presentation?: "scene" | "dock";
 };
 
 const storyPoses: Array<{
@@ -79,6 +80,7 @@ function PrecisionCube({
   timelineRef,
   selectedIndex,
   reducedMotion,
+  presentation = "scene",
 }: ServicesCanvasProps) {
   const groupRef = useRef<THREE.Group>(null);
   const panelRefs = useRef<Array<THREE.Group | null>>([]);
@@ -100,6 +102,8 @@ function PrecisionCube({
     const group = groupRef.current;
     if (!group) return;
 
+    const isDock = presentation === "dock";
+    const isCompact = state.viewport.width < 6;
     const timeline = timelineRef.current;
     const storyPose = mixPose(timeline.storyProgress);
     const servicePose = cubeitServices[selectedIndex]?.pose ?? cubeitServices[0].pose;
@@ -107,9 +111,9 @@ function PrecisionCube({
     const horizontalWeight = timeline.horizontalProgress;
     const introWeight = timeline.introProgress;
     const velocityDamp = 1 - Math.min(0.65, Math.abs(timeline.scrollVelocity) * 0.35);
-    const float = reducedMotion ? 0 : Math.sin(state.clock.elapsedTime * 0.8) * 0.025;
-    const pointerX = reducedMotion ? 0 : timeline.pointerX * 0.07 * velocityDamp;
-    const pointerY = reducedMotion ? 0 : timeline.pointerY * 0.055 * velocityDamp;
+    const float = reducedMotion ? 0 : Math.sin(state.clock.elapsedTime * 0.8) * (isDock ? 0.014 : 0.025);
+    const pointerX = reducedMotion || isDock ? 0 : timeline.pointerX * 0.07 * velocityDamp;
+    const pointerY = reducedMotion || isDock ? 0 : timeline.pointerY * 0.055 * velocityDamp;
 
     let rx = storyPose.rotation[0];
     let ry = storyPose.rotation[1];
@@ -142,10 +146,28 @@ function PrecisionCube({
       rx = THREE.MathUtils.lerp(rx, servicePose[0], s);
       ry = THREE.MathUtils.lerp(ry, servicePose[1], s);
       rz = THREE.MathUtils.lerp(rz, servicePose[2], s);
-      x = THREE.MathUtils.lerp(x, 0, s);
-      y = THREE.MathUtils.lerp(-0.76, -0.18 + float, s);
-      z = THREE.MathUtils.lerp(-0.28, 0, s);
-      scale = THREE.MathUtils.lerp(0.74, 1.02, s);
+      x = THREE.MathUtils.lerp(x, 1.72, s);
+      y = THREE.MathUtils.lerp(y, 0.74 + float * 0.35, s);
+      z = THREE.MathUtils.lerp(z, -0.82, s);
+      scale = THREE.MathUtils.lerp(scale, 0.42, s);
+    }
+
+    if (isCompact) {
+      x = THREE.MathUtils.lerp(x, 0, 0.82);
+      y = THREE.MathUtils.lerp(y, -0.06 + float * 0.4, 0.48);
+      z = THREE.MathUtils.lerp(z, -0.18, 0.4);
+      rx *= 0.82;
+      rz *= 0.72;
+    }
+
+    if (isDock) {
+      rx = -0.3;
+      ry = 0.58 + (reducedMotion ? 0 : Math.sin(state.clock.elapsedTime * 0.42) * 0.035);
+      rz = -0.035;
+      x = 0;
+      y = -0.04 + float;
+      z = 0;
+      scale = 0.96;
     }
 
     targetRotation.current.set(rx + pointerY, ry + pointerX, rz);
@@ -157,7 +179,7 @@ function PrecisionCube({
     group.position.x = THREE.MathUtils.damp(group.position.x, targetPosition.current.x, 8, delta);
     group.position.y = THREE.MathUtils.damp(group.position.y, targetPosition.current.y, 8, delta);
     group.position.z = THREE.MathUtils.damp(group.position.z, targetPosition.current.z, 8, delta);
-    const responsiveScale = state.viewport.width < 6 ? 0.62 : 0.76;
+    const responsiveScale = isDock ? 0.72 : isCompact ? 0.64 : 0.76;
     const targetScale = scale * responsiveScale;
     group.scale.setScalar(THREE.MathUtils.damp(group.scale.x, targetScale, 8, delta));
 
@@ -218,7 +240,7 @@ function PrecisionCube({
               clearcoat={0.85}
               clearcoatRoughness={0.12}
               emissive={index % 2 === 0 ? "#000000" : "#061739"}
-              emissiveIntensity={0.1}
+              emissiveIntensity={presentation === "dock" ? 0.18 : 0.1}
             />
           </RoundedBox>
           <mesh position={[0, 0, 0.052]}>
@@ -245,19 +267,6 @@ function ServicesLighting() {
 }
 
 function Scene(props: ServicesCanvasProps) {
-  const { camera, gl } = useThree();
-
-  useEffect(() => {
-    gl.outputColorSpace = THREE.SRGBColorSpace;
-    gl.toneMapping = THREE.ACESFilmicToneMapping;
-    gl.toneMappingExposure = 1.05;
-  }, [gl]);
-
-  useFrame((_, delta) => {
-    camera.position.z = THREE.MathUtils.damp(camera.position.z, 6.2, 4, delta);
-    camera.updateProjectionMatrix();
-  });
-
   return (
     <>
       <ServicesLighting />
@@ -267,14 +276,20 @@ function Scene(props: ServicesCanvasProps) {
 }
 
 export default function ServicesCanvas(props: ServicesCanvasProps) {
-  const dpr = useMemo<[number, number]>(() => (typeof window !== "undefined" && window.innerWidth < 760 ? [1, 1.2] : [1, 1.65]), []);
+  const dpr = useMemo<[number, number]>(() => (typeof window !== "undefined" && window.innerWidth < 760 ? [1, 1.15] : [1, 1.45]), []);
+  const cameraZ = useMemo(() => (typeof window !== "undefined" && window.innerWidth < 760 ? 6.8 : 6.2), []);
 
   return (
     <Canvas
       aria-hidden="true"
-      camera={{ fov: 32, position: [0, 0, 6.2], near: 0.1, far: 40 }}
+      camera={{ fov: 32, position: [0, 0, cameraZ], near: 0.1, far: 40 }}
       dpr={dpr}
-      gl={{ alpha: true, antialias: true, powerPreference: "high-performance" }}
+      gl={{ alpha: true, antialias: true, powerPreference: "high-performance", stencil: false }}
+      onCreated={({ gl }) => {
+        gl.outputColorSpace = THREE.SRGBColorSpace;
+        gl.toneMapping = THREE.ACESFilmicToneMapping;
+        gl.toneMappingExposure = 1.05;
+      }}
     >
       <Scene {...props} />
     </Canvas>
