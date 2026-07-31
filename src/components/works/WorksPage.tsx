@@ -18,7 +18,7 @@ function canUseWebGL() {
   if (typeof window === "undefined") return false;
   try {
     const canvas = document.createElement("canvas");
-    return Boolean(canvas.getContext("webgl") || canvas.getContext("experimental-webgl"));
+    return Boolean(canvas.getContext("webgl2") || canvas.getContext("webgl") || canvas.getContext("experimental-webgl"));
   } catch {
     return false;
   }
@@ -30,6 +30,43 @@ function emitHover(id: string | null) {
 
 function emitActive(id: string | null) {
   window.dispatchEvent(new CustomEvent("works-media-active", { detail: id }));
+}
+
+function getRootTheme() {
+  if (typeof document === "undefined") return "light";
+  const storedTheme = typeof localStorage === "undefined"
+    ? null
+    : localStorage.getItem("cubeit-theme") ?? localStorage.getItem("theme");
+  return document.documentElement.classList.contains("dark") || document.documentElement.dataset.theme === "dark" || storedTheme === "dark"
+    ? "dark"
+    : "light";
+}
+
+function useRootTheme() {
+  const [theme, setTheme] = useState<"light" | "dark">("light");
+
+  useEffect(() => {
+    const updateTheme = () => setTheme(getRootTheme());
+    updateTheme();
+    const observer = new MutationObserver(updateTheme);
+    observer.observe(document.documentElement, { attributes: true, attributeFilter: ["class", "data-theme"] });
+    return () => observer.disconnect();
+  }, []);
+
+  return theme;
+}
+
+function WebGLLoader({ label }: { label: string }) {
+  return (
+    <div className={styles.webglLoader} role="status" aria-live="polite">
+      <div className={styles.loaderMark} aria-hidden="true">
+        <span />
+        <span />
+        <span />
+      </div>
+      <p>{label}</p>
+    </div>
+  );
 }
 
 function MediaFrame({ project, id }: { project: WorkProject; id: string }) {
@@ -51,16 +88,25 @@ function MediaFrame({ project, id }: { project: WorkProject; id: string }) {
 export default function WorksPage() {
   const router = useRouter();
   const reducedMotion = useReducedMotion();
+  const rootTheme = useRootTheme();
+  const [webglChecked, setWebglChecked] = useState(false);
   const [webglReady, setWebglReady] = useState(false);
   const [canvasHealthy, setCanvasHealthy] = useState(false);
+  const [webglFailed, setWebglFailed] = useState(false);
   const [transitionProject, setTransitionProject] = useState<WorkProject | null>(null);
-  const canvasMounted = webglReady && !reducedMotion;
+  const canvasMounted = webglReady && !reducedMotion && !webglFailed;
   const canvasActive = canvasMounted && canvasHealthy;
+  const canvasLoading = !webglFailed && (!webglChecked || (canvasMounted && !canvasHealthy));
 
   useEffect(() => {
-    setWebglReady(canUseWebGL());
+    const capable = canUseWebGL();
+    setWebglReady(capable);
+    setWebglFailed(!capable || Boolean(reducedMotion));
+    setWebglChecked(true);
     const onCanvasHealth = (event: Event) => {
-      setCanvasHealthy(Boolean((event as CustomEvent<boolean>).detail));
+      const healthy = Boolean((event as CustomEvent<boolean>).detail);
+      setCanvasHealthy(healthy);
+      if (healthy) setWebglFailed(false);
     };
 
     window.addEventListener("works-media-canvas-health", onCanvasHealth);
@@ -70,7 +116,17 @@ export default function WorksPage() {
       emitActive(null);
       window.removeEventListener("works-media-canvas-health", onCanvasHealth);
     };
-  }, []);
+  }, [reducedMotion]);
+
+  useEffect(() => {
+    if (!canvasLoading || !canvasMounted) return;
+    const timeout = window.setTimeout(() => {
+      setWebglFailed(true);
+      setCanvasHealthy(false);
+    }, 6500);
+
+    return () => window.clearTimeout(timeout);
+  }, [canvasLoading, canvasMounted]);
 
   useEffect(() => {
     if (!transitionProject) return;
@@ -93,19 +149,29 @@ export default function WorksPage() {
     event.preventDefault();
 
     if (!canvasActive) {
-      router.push(`/our-work/${project.slug}`);
+      setTransitionProject(project);
+      window.setTimeout(() => emitActive(`${project.slug}-transition`), 0);
+      window.setTimeout(() => {
+        router.push(`/our-work/${project.slug}`);
+      }, 520);
       return;
     }
 
     setTransitionProject(project);
-    emitActive(project.slug);
+    window.setTimeout(() => emitActive(`${project.slug}-transition`), 0);
     window.setTimeout(() => {
       router.push(`/our-work/${project.slug}`);
     }, 760);
   };
 
   return (
-    <div className={styles.page} data-webgl-active={canvasActive ? "true" : "false"}>
+    <div
+      className={styles.page}
+      data-works-theme={rootTheme}
+      data-webgl-active={canvasActive ? "true" : "false"}
+      data-webgl-failed={webglFailed ? "true" : "false"}
+      data-webgl-loading={canvasLoading ? "true" : "false"}
+    >
       <CursorFill defaultColor="#1e63f4" />
       {canvasMounted ? (
         <div className={styles.canvasLayer} aria-hidden="true">
@@ -185,6 +251,7 @@ export default function WorksPage() {
               </a>
             ))}
           </div>
+          {canvasLoading ? <WebGLLoader label="Preparing the WebGL work wall" /> : null}
         </section>
 
         <section className={styles.servicesBand} id="services" aria-labelledby="work-services-title">
@@ -217,8 +284,18 @@ export default function WorksPage() {
       {transitionProject ? (
         <div className={styles.transitionOverlay} aria-hidden="true">
           <div className={styles.transitionCard}>
-            <img src={transitionProject.cover} alt="" />
-            <span>Opening {transitionProject.title}</span>
+            <div
+              className={styles.transitionMedia}
+              data-elastic-media
+              data-media-id={`${transitionProject.slug}-transition`}
+              data-media-src={transitionProject.cover}
+              data-image-width={transitionProject.width}
+              data-image-height={transitionProject.height}
+              style={{ "--media-ratio": `${transitionProject.width} / ${transitionProject.height}` } as CSSProperties}
+            >
+              <img src={transitionProject.cover} alt="" />
+            </div>
+            <span>Loading {transitionProject.title}</span>
           </div>
         </div>
       ) : null}

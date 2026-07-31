@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useRef, useState, type MutableRefObject } from "react";
+import { Suspense, useEffect, useMemo, useRef, useState, type MutableRefObject } from "react";
 import { Canvas, useFrame, useLoader, useThree } from "@react-three/fiber";
 import * as THREE from "three";
 
@@ -23,23 +23,26 @@ type ScrollState = {
   previous: number;
   velocity: number;
   shaderVelocity: number;
+  direction: number;
+  energy: number;
+  time: number;
   hoverId: string | null;
   activeId: string | null;
 };
 
 const CONFIG = {
-  curveDepth: 86,
-  curveAngle: 0.092,
-  bendStrength: 0.009,
-  stretchStrength: 0.018,
-  depthStrength: 18,
-  velocityMultiplier: 0.0005,
-  velocityClamp: 0.86,
-  scrollLerp: 28,
-  deformationDamping: 17,
-  hoverStrength: 0.1,
+  curveDepth: 74,
+  curveAngle: 0.072,
+  bendStrength: 0.015,
+  stretchStrength: 0.026,
+  depthStrength: 22,
+  shearStrength: 0.018,
+  velocityMultiplier: 0.00042,
+  velocityClamp: 0.76,
+  scrollLerp: 34,
+  deformationDamping: 14,
   defaultRadius: 7,
-  visibilityPadding: 360,
+  visibilityPadding: 520,
 };
 
 const vertexShader = `
@@ -49,8 +52,11 @@ const vertexShader = `
   uniform float uBendStrength;
   uniform float uStretchStrength;
   uniform float uDepthStrength;
+  uniform float uShearStrength;
   uniform float uVariation;
+  uniform float uTime;
   varying vec2 vUv;
+  varying float vEnergy;
 
   void main() {
     vUv = uv;
@@ -59,14 +65,19 @@ const vertexShader = `
     float velocityAmount = abs(signedVelocity);
     float verticalProfile = sin(uv.y * 3.14159265);
     float horizontalProfile = (uv.x - 0.5) * 2.0;
-    float secondaryProfile = sin((uv.y + uVariation * 0.04) * 6.2831853) * 0.12;
-    float elasticProfile = verticalProfile + secondaryProfile;
+    float diagonalProfile = sin((uv.x * 1.55 + uv.y * 0.92 + uVariation * 0.17) * 3.14159265);
+    float ribbonProfile = sin((uv.y + uVariation * 0.025 + uTime * 0.012) * 6.2831853) * 0.08;
+    float elasticProfile = verticalProfile + ribbonProfile;
 
-    pos.x += signedVelocity * uBendStrength * elasticProfile * (1.0 + abs(horizontalProfile) * 0.22);
-    pos.y *= 1.0 + velocityAmount * uStretchStrength * verticalProfile;
+    pos.x += signedVelocity * uBendStrength * elasticProfile * (1.0 + abs(horizontalProfile) * 0.28);
+    pos.x += signedVelocity * uShearStrength * (uv.y - 0.5);
+    pos.y *= 1.0 + velocityAmount * uStretchStrength * (0.55 + verticalProfile * 0.45);
+    pos.y += signedVelocity * uStretchStrength * 0.18 * diagonalProfile;
     pos.z += velocityAmount * uDepthStrength * verticalProfile;
-    pos.z += signedVelocity * uDepthStrength * 0.16 * horizontalProfile * verticalProfile;
-    pos.z += uHover * 14.0;
+    pos.z += signedVelocity * uDepthStrength * 0.18 * horizontalProfile * verticalProfile;
+    pos.z += velocityAmount * uDepthStrength * 0.18 * diagonalProfile;
+    pos.z += uHover * 16.0;
+    vEnergy = velocityAmount;
 
     gl_Position = projectionMatrix * modelViewMatrix * vec4(pos, 1.0);
   }
@@ -80,7 +91,9 @@ const fragmentShader = `
   uniform float uHover;
   uniform float uOpacity;
   uniform float uRadius;
+  uniform float uTime;
   varying vec2 vUv;
+  varying float vEnergy;
 
   vec2 coverUv(vec2 uv, vec2 image, vec2 plane) {
     float imageAspect = image.x / image.y;
@@ -106,9 +119,16 @@ const fragmentShader = `
     vec2 uv = coverUv(vUv, uImageResolution, uPlaneResolution);
     float roundedMask = roundedRectMask(vUv, uPlaneResolution, uRadius);
     if (roundedMask < 0.01) discard;
-    uv.x += clamp(uVelocity, -1.0, 1.0) * (vUv.y - 0.5) * 0.011;
-    vec4 color = texture2D(uTexture, uv);
-    color.rgb = mix(color.rgb, color.rgb * vec3(1.015, 1.03, 1.055), uHover * 0.16);
+    float signedVelocity = clamp(uVelocity, -1.0, 1.0);
+    float ripple = sin((vUv.y * 2.0 + vUv.x * 0.72 + uTime * 0.018) * 6.2831853);
+    vec2 warpedUv = uv;
+    warpedUv.x += signedVelocity * (vUv.y - 0.5) * 0.015;
+    warpedUv.y += abs(signedVelocity) * ripple * 0.0028;
+    vec4 color = texture2D(uTexture, warpedUv);
+    vec4 colorShift = texture2D(uTexture, warpedUv + vec2(signedVelocity * 0.0045, 0.0));
+    color.r = mix(color.r, colorShift.r, min(vEnergy * 0.34, 0.22));
+    color.rgb = mix(color.rgb, color.rgb * vec3(1.018, 1.032, 1.055), uHover * 0.16);
+    color.rgb = mix(color.rgb, color.rgb * vec3(0.988, 0.996, 1.018), min(vEnergy * 0.12, 0.08));
     gl_FragColor = vec4(color.rgb, color.a * uOpacity * roundedMask);
   }
 `;
@@ -163,7 +183,7 @@ function useMeasuredMedia() {
             const rect = node.getBoundingClientRect();
             const radius = Number.parseFloat(getComputedStyle(node).borderTopLeftRadius);
             const cssRadius = Number.isFinite(radius) && radius > 0 ? radius : CONFIG.defaultRadius;
-            const measuredRadius = THREE.MathUtils.clamp(cssRadius, 5, 8);
+            const measuredRadius = THREE.MathUtils.clamp(cssRadius, 6, 10);
             return {
               id: node.dataset.mediaId ?? `media-${index}`,
               src: node.dataset.mediaSrc ?? "",
@@ -230,7 +250,9 @@ function MediaPlane({ item, scroll }: { item: MediaMeasure; scroll: MutableRefOb
         uBendStrength: { value: CONFIG.bendStrength },
         uStretchStrength: { value: CONFIG.stretchStrength },
         uDepthStrength: { value: CONFIG.depthStrength },
+        uShearStrength: { value: CONFIG.shearStrength },
         uVariation: { value: item.variation },
+        uTime: { value: 0 },
       },
       vertexShader,
       fragmentShader,
@@ -246,6 +268,9 @@ function MediaPlane({ item, scroll }: { item: MediaMeasure; scroll: MutableRefOb
     texture.wrapS = THREE.ClampToEdgeWrapping;
     texture.wrapT = THREE.ClampToEdgeWrapping;
     texture.anisotropy = 2;
+    texture.generateMipmaps = true;
+    texture.minFilter = THREE.LinearMipmapLinearFilter;
+    texture.magFilter = THREE.LinearFilter;
     material.uniforms.uTexture.value = texture;
     return () => material.dispose();
   }, [material, texture]);
@@ -270,15 +295,17 @@ function MediaPlane({ item, scroll }: { item: MediaMeasure; scroll: MutableRefOb
     mesh.visible = visible;
     if (!visible) return;
 
-    mesh.position.set(x, y, curveZ + hoverValue * 32);
-    mesh.rotation.y = normalizedX * CONFIG.curveAngle * (1 - hoverValue * 0.46);
-    mesh.rotation.x = -state.shaderVelocity * 0.016;
-    mesh.scale.set(item.width * (1 + hoverValue * 0.014), item.height * (1 + hoverValue * 0.01), 1);
+    mesh.position.set(x, y, curveZ + hoverValue * 34);
+    mesh.rotation.y = normalizedX * CONFIG.curveAngle * (1 - hoverValue * 0.46) + state.shaderVelocity * 0.018;
+    mesh.rotation.x = -state.shaderVelocity * 0.014;
+    mesh.rotation.z = state.shaderVelocity * 0.004;
+    mesh.scale.set(item.width * (1 + hoverValue * 0.014), item.height * (1 + Math.abs(state.shaderVelocity) * 0.012 + hoverValue * 0.01), 1);
 
     material.uniforms.uVelocity.value = state.shaderVelocity;
     material.uniforms.uHover.value = hoverValue;
     material.uniforms.uOpacity.value = THREE.MathUtils.damp(material.uniforms.uOpacity.value as number, hiddenByActiveProject ? 0.16 : 1, 12, delta);
     material.uniforms.uRadius.value = Math.min(item.radius, item.width * 0.5, item.height * 0.5);
+    material.uniforms.uTime.value = state.time;
   });
 
   return (
@@ -332,11 +359,23 @@ function Scene({ items }: { items: MediaMeasure[] }) {
     previous: 0,
     velocity: 0,
     shaderVelocity: 0,
+    direction: 1,
+    energy: 0,
+    time: 0,
     hoverId: null,
     activeId: null,
   });
   const readyRef = useRef(false);
+  const readyFrameCountRef = useRef(0);
   const { gl } = useThree();
+  const itemSignature = useMemo(() => items.map((item) => `${item.id}:${item.src}`).join("|"), [items]);
+
+  const report = useMemo(
+    () => (ready: boolean) => {
+      window.dispatchEvent(new CustomEvent("works-media-canvas-health", { detail: ready }));
+    },
+    [],
+  );
 
   useEffect(() => {
     const update = () => {
@@ -366,15 +405,14 @@ function Scene({ items }: { items: MediaMeasure[] }) {
 
   useEffect(() => {
     const canvas = gl.domElement;
-    const report = (ready: boolean) => {
-      window.dispatchEvent(new CustomEvent("works-media-canvas-health", { detail: ready }));
-    };
     const onContextLost = () => {
       readyRef.current = false;
+      readyFrameCountRef.current = 0;
       report(false);
     };
     const onContextRestored = () => {
       readyRef.current = false;
+      readyFrameCountRef.current = 0;
     };
 
     canvas.addEventListener("webglcontextlost", onContextLost);
@@ -384,15 +422,30 @@ function Scene({ items }: { items: MediaMeasure[] }) {
       canvas.removeEventListener("webglcontextlost", onContextLost);
       canvas.removeEventListener("webglcontextrestored", onContextRestored);
     };
-  }, [gl]);
+  }, [gl, report]);
+
+  useEffect(() => {
+    readyRef.current = false;
+    readyFrameCountRef.current = 0;
+    report(false);
+  }, [itemSignature, report]);
 
   useFrame((_, delta) => {
     const state = scroll.current;
     const context = gl.getContext();
 
-    if (!readyRef.current && items.length > 0 && context.drawingBufferWidth > 0 && context.drawingBufferHeight > 0) {
+    const hasMeasuredMedia = items.length > 0;
+    const rendererReady = context.drawingBufferWidth > 0 && context.drawingBufferHeight > 0;
+
+    if (!readyRef.current && hasMeasuredMedia && rendererReady) {
+      readyFrameCountRef.current += 1;
+    } else if (!hasMeasuredMedia || !rendererReady) {
+      readyFrameCountRef.current = 0;
+    }
+
+    if (!readyRef.current && readyFrameCountRef.current >= 4) {
       readyRef.current = true;
-      window.dispatchEvent(new CustomEvent("works-media-canvas-health", { detail: true }));
+      report(true);
     }
 
     const frameDelta = Math.min(delta, 0.05);
@@ -402,15 +455,21 @@ function Scene({ items }: { items: MediaMeasure[] }) {
       state.current = state.target;
     }
     state.velocity = (state.current - state.previous) / Math.max(frameDelta, 1 / 120);
+    state.direction = state.velocity === 0 ? state.direction : Math.sign(state.velocity);
     const normalized = THREE.MathUtils.clamp(state.velocity * CONFIG.velocityMultiplier, -CONFIG.velocityClamp, CONFIG.velocityClamp);
-    state.shaderVelocity = THREE.MathUtils.damp(state.shaderVelocity, normalized, CONFIG.deformationDamping, frameDelta);
+    const velocityTarget = Math.sign(normalized) * Math.pow(Math.abs(normalized), 0.82);
+    state.shaderVelocity = THREE.MathUtils.damp(state.shaderVelocity, velocityTarget, CONFIG.deformationDamping, frameDelta);
+    state.energy = THREE.MathUtils.damp(state.energy, Math.abs(velocityTarget), 10, frameDelta);
+    state.time += frameDelta * (0.8 + state.energy * 3.2);
     state.previous = state.current;
   });
 
   return (
     <>
       <CurvedGrid scroll={scroll} />
-      {items.map((item) => <MediaPlane key={item.id} item={item} scroll={scroll} />)}
+      <Suspense fallback={null}>
+        {items.map((item) => <MediaPlane key={item.id} item={item} scroll={scroll} />)}
+      </Suspense>
     </>
   );
 }
@@ -423,7 +482,11 @@ export default function ElasticMediaCanvas() {
       orthographic
       camera={{ position: [0, 0, 600], zoom: 1, near: 0.1, far: 1200 }}
       dpr={[1, 1.25]}
-      gl={{ alpha: true, antialias: false, powerPreference: "high-performance" }}
+      gl={{ alpha: true, antialias: false, premultipliedAlpha: false, powerPreference: "high-performance" }}
+      onCreated={({ gl }) => {
+        gl.setClearColor(0x000000, 0);
+        window.dispatchEvent(new CustomEvent("works-media-canvas-health", { detail: false }));
+      }}
     >
       <Scene items={items} />
     </Canvas>
