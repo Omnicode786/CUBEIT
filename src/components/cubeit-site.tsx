@@ -562,6 +562,7 @@ export function Navbar() {
         <a href="/">Home</a>
         <a href="/services">Services</a>
         <a href="/our-work">Our Work</a>
+        <a href="/team">Team</a>
         <a href="/cubeiq">CubeIQ</a>
       </nav>
       <div className="nav-actions">
@@ -1240,6 +1241,7 @@ export function Footer() {
             <a href="/">Home</a>
             <a href="/services">Services</a>
             <a href="/our-work">Things We Build</a>
+            <a href="/team">Team</a>
             <a href="/contact">Contact</a>
           </div>
           <div>
