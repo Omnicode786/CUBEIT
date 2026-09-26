@@ -1,7 +1,7 @@
 "use client";
 
 import dynamic from "next/dynamic";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 
 const CursorFill = dynamic(
   () => import("@/components/motion/cursor-fill").then((mod) => mod.CursorFill),
@@ -15,6 +15,7 @@ const KineticCursorTrail = dynamic(
 
 export default function LazyCursorEffects() {
   const [enabled, setEnabled] = useState(false);
+  const containerRef = useRef<HTMLElement | null>(null);
 
   useEffect(() => {
     const finePointer = window.matchMedia("(pointer: fine)").matches;
@@ -26,9 +27,9 @@ export default function LazyCursorEffects() {
   if (!enabled) return null;
 
   return (
-    <>
+    <div ref={containerRef} className="contents">
       <CursorFill />
-      <KineticCursorTrail />
-    </>
+      <KineticCursorTrail containerRef={containerRef} />
+    </div>
   );
 }
