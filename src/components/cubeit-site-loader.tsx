@@ -1,9 +1,14 @@
+"use client";
+
 import dynamic from "next/dynamic";
 
 const CubeITSite = dynamic(() => import("@/components/cubeit-site"), {
   ssr: false,
   loading: () => (
-    <div className="min-h-screen bg-black" aria-label="Loading CubeIT experience" />
+    <div
+      className="min-h-screen bg-black"
+      aria-label="Loading CubeIT experience"
+    />
   ),
 });
 
