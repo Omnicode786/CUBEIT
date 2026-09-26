@@ -1,5 +1,5 @@
-import CubeITSite from "@/components/cubeit-site";
+import CubeITSiteLoader from "@/components/cubeit-site-loader";
 
 export default function Home() {
-  return <CubeITSite />;
+  return <CubeITSiteLoader />;
 }
