@@ -14,12 +14,14 @@ const KineticCursorTrail = dynamic(
 );
 
 export default function LazyCursorEffects() {
+  const containerRef = useRef<HTMLDivElement | null>(null);
   const [enabled, setEnabled] = useState(false);
-  const containerRef = useRef<HTMLElement | null>(null);
 
   useEffect(() => {
     const finePointer = window.matchMedia("(pointer: fine)").matches;
-    const reducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    const reducedMotion = window.matchMedia(
+      "(prefers-reduced-motion: reduce)"
+    ).matches;
 
     setEnabled(finePointer && !reducedMotion);
   }, []);
