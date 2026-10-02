@@ -71,43 +71,12 @@ export function useServicesScrollTimeline({
     let previousScroll = window.scrollY;
     let previousTime = performance.now();
 
-    const measure = () => {
-      const section = horizontalRef.current;
-      const viewport = horizontalViewportRef.current;
-      const track = horizontalTrackRef.current;
-      if (!section || !viewport || !track) return;
-
-      if (reducedMotion || window.innerWidth < 900) {
-        maxTranslateRef.current = 0;
-        if (horizontalHeightRef.current !== 0) {
-          horizontalHeightRef.current = 0;
-          setHorizontalHeight(0);
-        }
-        section.style.removeProperty("--services-horizontal-x");
-        section.style.removeProperty("--services-horizontal-progress");
-        section.style.removeProperty("--services-horizontal-header-opacity");
-        return;
-      }
-
-      const maxTranslate = Math.max(0, track.scrollWidth - viewport.clientWidth);
-      const nextHeight = Math.max(window.innerHeight * 1.2, maxTranslate + window.innerHeight);
-      maxTranslateRef.current = maxTranslate;
-      if (Math.abs(horizontalHeightRef.current - nextHeight) > 2) {
-        horizontalHeightRef.current = nextHeight;
-        setHorizontalHeight(nextHeight);
-      }
+    const scheduleTick = () => {
+      if (!frame) frame = requestAnimationFrame(tick);
     };
 
-    const ro = new ResizeObserver(measure);
-    [horizontalRef.current, horizontalViewportRef.current, horizontalTrackRef.current].forEach((node) => {
-      if (node) ro.observe(node);
-    });
-
-    measure();
-    window.addEventListener("resize", measure, { passive: true });
-    document.fonts?.ready.then(measure).catch(() => undefined);
-
-    const tick = (time: number) => {
+    function tick(time: number) {
+      frame = 0;
       const viewportHeight = window.innerHeight || 1;
       const currentScroll = window.scrollY;
       const delta = Math.max(16, time - previousTime);
@@ -140,15 +109,59 @@ export function useServicesScrollTimeline({
 
       previousScroll = currentScroll;
       previousTime = time;
-      frame = requestAnimationFrame(tick);
+
+      // Keep a short tail only while velocity smoothing is settling. Once the
+      // page is idle, stop measuring DOMRects every animation frame.
+      if (Math.abs(timelineRef.current.scrollVelocity) > 0.002) {
+        frame = requestAnimationFrame(tick);
+      }
+    }
+
+    const measure = () => {
+      const section = horizontalRef.current;
+      const viewport = horizontalViewportRef.current;
+      const track = horizontalTrackRef.current;
+      if (!section || !viewport || !track) return;
+
+      if (reducedMotion || window.innerWidth < 900) {
+        maxTranslateRef.current = 0;
+        if (horizontalHeightRef.current !== 0) {
+          horizontalHeightRef.current = 0;
+          setHorizontalHeight(0);
+        }
+        section.style.removeProperty("--services-horizontal-x");
+        section.style.removeProperty("--services-horizontal-progress");
+        section.style.removeProperty("--services-horizontal-header-opacity");
+        scheduleTick();
+        return;
+      }
+
+      const maxTranslate = Math.max(0, track.scrollWidth - viewport.clientWidth);
+      const nextHeight = Math.max(window.innerHeight * 1.2, maxTranslate + window.innerHeight);
+      maxTranslateRef.current = maxTranslate;
+      if (Math.abs(horizontalHeightRef.current - nextHeight) > 2) {
+        horizontalHeightRef.current = nextHeight;
+        setHorizontalHeight(nextHeight);
+      }
+      scheduleTick();
     };
 
-    frame = requestAnimationFrame(tick);
+    const ro = new ResizeObserver(measure);
+    [horizontalRef.current, horizontalViewportRef.current, horizontalTrackRef.current].forEach((node) => {
+      if (node) ro.observe(node);
+    });
+
+    measure();
+    window.addEventListener("resize", measure, { passive: true });
+    window.addEventListener("scroll", scheduleTick, { passive: true });
+    document.fonts?.ready.then(measure).catch(() => undefined);
+    scheduleTick();
 
     return () => {
-      cancelAnimationFrame(frame);
+      if (frame) cancelAnimationFrame(frame);
       ro.disconnect();
       window.removeEventListener("resize", measure);
+      window.removeEventListener("scroll", scheduleTick);
       document.documentElement.style.removeProperty("--services-canvas-opacity");
     };
   }, [horizontalRef, horizontalTrackRef, horizontalViewportRef, introRef, reducedMotion, selectorRef, storyRef]);
