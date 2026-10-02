@@ -1,0 +1,4 @@
+/* Homepage-specific visual removals requested after the performance pass. */
+.service-grid {
+  display: none !important;
+}
