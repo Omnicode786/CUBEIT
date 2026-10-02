@@ -16,6 +16,36 @@ interface GlowingEffectProps {
   movementDuration?: number;
   borderWidth?: number;
 }
+
+type GlobalMovePoint = { x: number; y: number };
+type GlobalMoveHandler = (point?: GlobalMovePoint) => void;
+
+const globalMoveHandlers = new Set<GlobalMoveHandler>();
+let globalListenersAttached = false;
+
+function handleGlobalPointerMove(event: PointerEvent) {
+  const point = { x: event.x, y: event.y };
+  globalMoveHandlers.forEach((handler) => handler(point));
+}
+
+function handleGlobalScroll() {
+  globalMoveHandlers.forEach((handler) => handler());
+}
+
+function attachGlobalListeners() {
+  if (globalListenersAttached || typeof window === "undefined" || !document.body) return;
+  globalListenersAttached = true;
+  window.addEventListener("scroll", handleGlobalScroll, { passive: true });
+  document.body.addEventListener("pointermove", handleGlobalPointerMove, { passive: true });
+}
+
+function detachGlobalListenersIfUnused() {
+  if (!globalListenersAttached || globalMoveHandlers.size > 0 || typeof window === "undefined" || !document.body) return;
+  globalListenersAttached = false;
+  window.removeEventListener("scroll", handleGlobalScroll);
+  document.body.removeEventListener("pointermove", handleGlobalPointerMove);
+}
+
 const GlowingEffect = memo(
   ({
     blur = 0,
@@ -34,7 +64,7 @@ const GlowingEffect = memo(
     const animationFrameRef = useRef<number>(0);
 
     const handleMove = useCallback(
-      (e?: MouseEvent | { x: number; y: number }) => {
+      (e?: GlobalMovePoint) => {
         if (!containerRef.current) return;
 
         if (animationFrameRef.current) {
@@ -42,6 +72,7 @@ const GlowingEffect = memo(
         }
 
         animationFrameRef.current = requestAnimationFrame(() => {
+          animationFrameRef.current = 0;
           const element = containerRef.current;
           if (!element) return;
 
@@ -100,20 +131,16 @@ const GlowingEffect = memo(
     useEffect(() => {
       if (disabled) return;
 
-      const handleScroll = () => handleMove();
-      const handlePointerMove = (e: PointerEvent) => handleMove(e);
-
-      window.addEventListener("scroll", handleScroll, { passive: true });
-      document.body.addEventListener("pointermove", handlePointerMove, {
-        passive: true,
-      });
+      globalMoveHandlers.add(handleMove);
+      attachGlobalListeners();
 
       return () => {
+        globalMoveHandlers.delete(handleMove);
         if (animationFrameRef.current) {
           cancelAnimationFrame(animationFrameRef.current);
+          animationFrameRef.current = 0;
         }
-        window.removeEventListener("scroll", handleScroll);
-        document.body.removeEventListener("pointermove", handlePointerMove);
+        detachGlobalListenersIfUnused();
       };
     }, [handleMove, disabled]);
 
