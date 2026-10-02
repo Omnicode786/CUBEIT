@@ -378,7 +378,7 @@ export default function CubeIQEnhancements() {
     setHosts({ hero: heroHost, method: methodHost });
     const cleanupTabs = installAudienceTabs(root);
 
-    let cleanupMotion = () => undefined;
+    let cleanupMotion: () => void = () => {};
     const frame = requestAnimationFrame(() => {
       cleanupMotion = rebuildCubeIQMotion(root);
     });
