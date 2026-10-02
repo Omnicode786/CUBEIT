@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import CubeIQPage from "@/components/cubeiq-page";
+import CubeIQEnhancements from "@/components/CubeIQEnhancements";
 
 export const metadata: Metadata = {
   title: "CubeIQ | Intelligent Digital Growth & Marketing",
@@ -7,5 +8,10 @@ export const metadata: Metadata = {
 };
 
 export default function Page() {
-  return <CubeIQPage />;
+  return (
+    <>
+      <CubeIQPage />
+      <CubeIQEnhancements />
+    </>
+  );
 }
