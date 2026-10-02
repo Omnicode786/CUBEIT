@@ -111,17 +111,37 @@ export default function ClothReel({ originSelector, targetSelector, stackSelecto
     const coarse = window.matchMedia("(pointer: coarse)").matches;
     let destroyed = false;
     let frame = 0;
+    let loopCallback: FrameRequestCallback | null = null;
     let renderer: THREE.WebGLRenderer | null = null;
     let geometry: THREE.PlaneGeometry | null = null;
     let material: THREE.ShaderMaterial | null = null;
     let texture: THREE.VideoTexture | null = null;
     let stackNearViewport = true;
+
+    const startLoop = () => {
+      if (!destroyed && stackNearViewport && loopCallback && !frame) {
+        frame = requestAnimationFrame(loopCallback);
+      }
+    };
+
+    const stopLoop = () => {
+      if (frame) {
+        cancelAnimationFrame(frame);
+        frame = 0;
+      }
+    };
+
     const visibilityObserver = new IntersectionObserver(
       ([entry]) => {
         stackNearViewport = entry.isIntersecting;
         canvas.style.visibility = stackNearViewport ? "visible" : "hidden";
-        if (stackNearViewport) video.play().catch(() => undefined);
-        else video.pause();
+        if (stackNearViewport) {
+          video.play().catch(() => undefined);
+          startLoop();
+        } else {
+          video.pause();
+          stopLoop();
+        }
       },
       { rootMargin: "320px 0px" },
     );
@@ -130,10 +150,9 @@ export default function ClothReel({ originSelector, targetSelector, stackSelecto
     let fallbackCurrent = 0;
     let fallbackLastTime = performance.now();
     const fallbackFrame = (now: number) => {
-      if (!stackNearViewport) {
-        frame = requestAnimationFrame(fallbackFrame);
-        return;
-      }
+      frame = 0;
+      if (!stackNearViewport) return;
+
       const stackRect = stack.getBoundingClientRect();
       const distance = Math.max(1, stack.offsetHeight - window.innerHeight);
       const desired = clamp01(-stackRect.top / distance);
@@ -154,9 +173,11 @@ export default function ClothReel({ originSelector, targetSelector, stackSelecto
 
     if (reduce || coarse) {
       fallback.dataset.active = "true";
-      fallbackFrame(performance.now());
+      loopCallback = fallbackFrame;
+      startLoop();
       return () => {
-        cancelAnimationFrame(frame);
+        destroyed = true;
+        stopLoop();
         visibilityObserver.disconnect();
       };
     }
@@ -167,9 +188,11 @@ export default function ClothReel({ originSelector, targetSelector, stackSelecto
       renderer.setClearColor(0x000000, 0);
     } catch {
       fallback.dataset.active = "true";
-      fallbackFrame(performance.now());
+      loopCallback = fallbackFrame;
+      startLoop();
       return () => {
-        cancelAnimationFrame(frame);
+        destroyed = true;
+        stopLoop();
         visibilityObserver.disconnect();
       };
     }
@@ -217,11 +240,9 @@ export default function ClothReel({ originSelector, targetSelector, stackSelecto
     };
 
     const render = (now: number) => {
-      if (destroyed || !renderer || !material) return;
-      if (!stackNearViewport) {
-        frame = requestAnimationFrame(render);
-        return;
-      }
+      frame = 0;
+      if (destroyed || !renderer || !material || !stackNearViewport) return;
+
       const stackRect = stack.getBoundingClientRect();
       const travel = Math.max(1, stack.offsetHeight - window.innerHeight);
       const desired = clamp01(-stackRect.top / travel);
@@ -274,11 +295,12 @@ export default function ClothReel({ originSelector, targetSelector, stackSelecto
     video.play().catch(() => undefined);
     canvas.dataset.ready = "true";
     window.addEventListener("resize", resize, { passive: true });
-    frame = requestAnimationFrame(render);
+    loopCallback = render;
+    startLoop();
 
     return () => {
       destroyed = true;
-      cancelAnimationFrame(frame);
+      stopLoop();
       visibilityObserver.disconnect();
       window.removeEventListener("resize", resize);
       video.pause();
