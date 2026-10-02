@@ -147,6 +147,8 @@ export default function TeamMorphSurface({ member, origin, sourceElement, onClos
   const [mounted, setMounted] = useState(false);
   const [open, setOpen] = useState(false);
   const [playing, setPlaying] = useState(true);
+  const [mediaStarted, setMediaStarted] = useState(false);
+  const [videoReady, setVideoReady] = useState(false);
   const [layout, setLayout] = useState<Layout>({
     circle: origin,
     ringPad: 0,
@@ -166,6 +168,10 @@ export default function TeamMorphSurface({ member, origin, sourceElement, onClos
   );
 
   const beginClose = useCallback(() => {
+    const video = videoRef.current;
+    if (video && !video.paused) video.pause();
+    setMediaStarted(false);
+    setVideoReady(false);
     setOpen(false);
     window.setTimeout(() => {
       if (sourceElement) sourceElement.style.visibility = "";
@@ -175,24 +181,36 @@ export default function TeamMorphSurface({ member, origin, sourceElement, onClos
   }, [onClose, reducedMotion, sourceElement]);
 
   useEffect(() => {
-    setMounted(true);
     lockScroll();
 
+    const initialLayout = getTargetLayout(member.id);
+    setLayout(initialLayout);
+    setMounted(true);
+
     const update = () => setLayout(getTargetLayout(member.id));
-    update();
     window.addEventListener("resize", update, { passive: true });
 
-    const id = window.requestAnimationFrame(() => setOpen(true));
+    const openId = window.requestAnimationFrame(() => setOpen(true));
+    const mediaId = window.setTimeout(() => setMediaStarted(true), reducedMotion ? 0 : 260);
     const focusId = window.setTimeout(() => dialogRef.current?.focus(), reducedMotion ? 0 : 380);
 
     return () => {
-      window.cancelAnimationFrame(id);
+      window.cancelAnimationFrame(openId);
+      window.clearTimeout(mediaId);
       window.clearTimeout(focusId);
       window.removeEventListener("resize", update);
       unlockScroll();
       if (sourceElement) sourceElement.style.visibility = "";
     };
   }, [member.id, reducedMotion, sourceElement]);
+
+  useEffect(() => {
+    if (!mediaStarted) return;
+    const video = videoRef.current;
+    if (!video) return;
+    video.load();
+    void video.play().then(() => setPlaying(true)).catch(() => setPlaying(false));
+  }, [mediaStarted]);
 
   useEffect(() => {
     const onKeyDown = (event: KeyboardEvent) => {
@@ -246,10 +264,16 @@ export default function TeamMorphSurface({ member, origin, sourceElement, onClos
 
   if (!mounted) return null;
 
-  const circle = open ? layout.circle : origin;
-  const orbitSize = layout.circle.width + layout.ringPad * 2;
-  const orbitLeft = layout.circle.left - layout.ringPad;
-  const orbitTop = layout.circle.top - layout.ringPad;
+  const targetCircle = layout.circle;
+  const orbitSize = targetCircle.width + layout.ringPad * 2;
+  const orbitLeft = targetCircle.left - layout.ringPad;
+  const orbitTop = targetCircle.top - layout.ringPad;
+  const closedTransform = {
+    x: origin.left - targetCircle.left,
+    y: origin.top - targetCircle.top,
+    scaleX: Math.max(0.001, origin.width / targetCircle.width),
+    scaleY: Math.max(0.001, origin.height / targetCircle.height),
+  };
 
   return createPortal(
     <div className={styles.morphLayer} role="presentation">
@@ -277,10 +301,24 @@ export default function TeamMorphSurface({ member, origin, sourceElement, onClos
       >
         <motion.div
           className={styles.morphSurface}
-          initial={{ ...origin, borderRadius: "50%" }}
-          animate={{ ...circle, borderRadius: "50%" }}
+          initial={reducedMotion ? { opacity: 0 } : closedTransform}
+          animate={reducedMotion
+            ? { opacity: open ? 1 : 0 }
+            : open
+              ? { x: 0, y: 0, scaleX: 1, scaleY: 1 }
+              : closedTransform}
           transition={circleTransition}
-          style={{ borderRadius: "50%" }}
+          style={{
+            left: targetCircle.left,
+            top: targetCircle.top,
+            width: targetCircle.width,
+            height: targetCircle.height,
+            borderRadius: "50%",
+            transformOrigin: "top left",
+            backgroundImage: `url(${member.photo})`,
+            backgroundSize: "cover",
+            backgroundPosition: "center",
+          }}
         >
           <video
             ref={videoRef}
@@ -288,14 +326,15 @@ export default function TeamMorphSurface({ member, origin, sourceElement, onClos
             className={styles.profileVideo}
             muted
             loop
-            autoPlay
             playsInline
-            preload="metadata"
+            preload="none"
             poster={member.poster}
+            data-ready={videoReady ? "true" : "false"}
+            onLoadedData={() => setVideoReady(true)}
             onPlay={() => setPlaying(true)}
             onPause={() => setPlaying(false)}
           >
-            <source src={member.video} type="video/mp4" />
+            {mediaStarted ? <source src={member.video} type="video/mp4" /> : null}
           </video>
           <div className={styles.profileMediaShade} aria-hidden="true" />
           <div className={styles.profileVideoRim} aria-hidden="true" />
@@ -324,11 +363,10 @@ export default function TeamMorphSurface({ member, origin, sourceElement, onClos
           className={styles.profileDetails}
           data-layout={layout.details.mode}
           style={{ left: layout.details.left, top: layout.details.top, width: layout.details.width }}
-          initial={{ opacity: 0, y: reducedMotion ? 0 : 18, filter: reducedMotion ? "none" : "blur(8px)" }}
+          initial={{ opacity: 0, y: reducedMotion ? 0 : 18 }}
           animate={{
             opacity: open ? 1 : 0,
             y: open ? 0 : 12,
-            filter: open ? "blur(0px)" : "blur(6px)",
           }}
           transition={{ duration: reducedMotion ? 0.1 : 0.42, delay: open && !reducedMotion ? 0.28 : 0 }}
         >
