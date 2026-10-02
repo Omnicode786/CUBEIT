@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { ArrowLeft, ArrowRight, Check, RotateCcw } from "lucide-react";
 import { diagnosticQuestions } from "./cubeiq.data";
 import styles from "./cubeiq.module.css";
@@ -18,20 +18,45 @@ function buildSummary(answers: Answers) {
 export default function GrowthDiagnostic() {
   const [step, setStep] = useState(0);
   const [answers, setAnswers] = useState<Answers>({});
+  const [isAdvancing, setIsAdvancing] = useState(false);
+  const advanceTimerRef = useRef<number | null>(null);
   const complete = step >= diagnosticQuestions.length;
   const current = diagnosticQuestions[step];
   const summary = useMemo(() => buildSummary(answers), [answers]);
 
+  useEffect(() => () => {
+    if (advanceTimerRef.current !== null) window.clearTimeout(advanceTimerRef.current);
+  }, []);
+
   const choose = (value: string) => {
-    if (!current) return;
-    const next = { ...answers, [current.id]: value };
-    setAnswers(next);
-    window.setTimeout(() => setStep((valueStep) => valueStep + 1), 160);
+    if (!current || isAdvancing) return;
+    setAnswers((previous) => ({ ...previous, [current.id]: value }));
+    setIsAdvancing(true);
+    if (advanceTimerRef.current !== null) window.clearTimeout(advanceTimerRef.current);
+    advanceTimerRef.current = window.setTimeout(() => {
+      setStep((valueStep) => Math.min(diagnosticQuestions.length, valueStep + 1));
+      setIsAdvancing(false);
+      advanceTimerRef.current = null;
+    }, 160);
   };
 
   const reset = () => {
+    if (advanceTimerRef.current !== null) {
+      window.clearTimeout(advanceTimerRef.current);
+      advanceTimerRef.current = null;
+    }
+    setIsAdvancing(false);
     setAnswers({});
     setStep(0);
+  };
+
+  const goBack = () => {
+    if (advanceTimerRef.current !== null) {
+      window.clearTimeout(advanceTimerRef.current);
+      advanceTimerRef.current = null;
+    }
+    setIsAdvancing(false);
+    setStep((value) => Math.max(0, value - 1));
   };
 
   const params = new URLSearchParams({
@@ -43,14 +68,14 @@ export default function GrowthDiagnostic() {
   });
 
   return (
-    <div className={styles.diagnostic} aria-live="polite">
+    <div className={styles.diagnostic} aria-live="polite" aria-busy={isAdvancing}>
       <div className={styles.diagnosticTopline}>
         <span>Growth opportunity diagnostic</span>
         <span>{complete ? "Complete" : `${String(step + 1).padStart(2, "0")} / 04`}</span>
       </div>
 
       <div className={styles.diagnosticProgress} aria-hidden="true">
-        <span style={{ transform: `scaleX(${complete ? 1 : step / diagnosticQuestions.length})` }} />
+        <span style={{ transform: `scaleX(${complete ? 1 : (step + 1) / diagnosticQuestions.length})` }} />
       </div>
 
       {!complete && current ? (
@@ -64,6 +89,8 @@ export default function GrowthDiagnostic() {
                 key={option}
                 className={answers[current.id] === option ? styles.optionActive : undefined}
                 onClick={() => choose(option)}
+                disabled={isAdvancing}
+                aria-pressed={answers[current.id] === option}
               >
                 <span>{option}</span>
                 <ArrowRight aria-hidden="true" />
@@ -73,8 +100,8 @@ export default function GrowthDiagnostic() {
           <div className={styles.diagnosticControls}>
             <button
               type="button"
-              onClick={() => setStep((value) => Math.max(0, value - 1))}
-              disabled={step === 0}
+              onClick={goBack}
+              disabled={step === 0 || isAdvancing}
             >
               <ArrowLeft aria-hidden="true" /> Back
             </button>
