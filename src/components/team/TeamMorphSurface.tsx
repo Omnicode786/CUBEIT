@@ -2,7 +2,7 @@
 
 import { motion, useReducedMotion } from "motion/react";
 import { Pause, Play, X } from "lucide-react";
-import { useCallback, useEffect, useMemo, useRef, useState, type CSSProperties } from "react";
+import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState, type CSSProperties } from "react";
 import { createPortal } from "react-dom";
 import type { TeamMember } from "./team-data";
 import SkillRing from "./SkillRing";
@@ -180,8 +180,26 @@ export default function TeamMorphSurface({ member, origin, sourceElement, onClos
     }, reducedMotion ? 130 : 560);
   }, [onClose, reducedMotion, sourceElement]);
 
-  useEffect(() => {
+  useLayoutEffect(() => {
     lockScroll();
+
+    const pageElement = sourceElement?.closest<HTMLElement>(`.${styles.page}`) ?? null;
+    const previousPageStyles = pageElement
+      ? {
+          filter: pageElement.style.filter,
+          transform: pageElement.style.transform,
+          transition: pageElement.style.transition,
+        }
+      : null;
+
+    // The modal backdrop already supplies the softened/dimmed background.
+    // Avoid animating a blur over the entire Team page at the same time as
+    // the profile morph; that full-page filter was one of the largest paints.
+    if (pageElement) {
+      pageElement.style.filter = "none";
+      pageElement.style.transform = "none";
+      pageElement.style.transition = "none";
+    }
 
     const initialLayout = getTargetLayout(member.id);
     setLayout(initialLayout);
@@ -200,6 +218,11 @@ export default function TeamMorphSurface({ member, origin, sourceElement, onClos
       window.clearTimeout(focusId);
       window.removeEventListener("resize", update);
       unlockScroll();
+      if (pageElement && previousPageStyles) {
+        pageElement.style.filter = previousPageStyles.filter;
+        pageElement.style.transform = previousPageStyles.transform;
+        pageElement.style.transition = previousPageStyles.transition;
+      }
       if (sourceElement) sourceElement.style.visibility = "";
     };
   }, [member.id, reducedMotion, sourceElement]);
@@ -285,6 +308,11 @@ export default function TeamMorphSurface({ member, origin, sourceElement, onClos
         initial={{ opacity: 0 }}
         animate={{ opacity: open ? 1 : 0 }}
         transition={{ duration: reducedMotion ? 0.1 : 0.3 }}
+        style={{
+          backdropFilter: "blur(18px)",
+          WebkitBackdropFilter: "blur(18px)",
+          willChange: "opacity",
+        }}
       />
 
       <div
@@ -318,6 +346,8 @@ export default function TeamMorphSurface({ member, origin, sourceElement, onClos
             backgroundImage: `url(${member.photo})`,
             backgroundSize: "cover",
             backgroundPosition: "center",
+            willChange: "transform",
+            contain: "layout paint style",
           }}
         >
           <video
@@ -330,6 +360,11 @@ export default function TeamMorphSurface({ member, origin, sourceElement, onClos
             preload="none"
             poster={member.poster}
             data-ready={videoReady ? "true" : "false"}
+            style={{
+              opacity: videoReady ? 1 : 0,
+              transition: "opacity 180ms ease",
+              willChange: "opacity",
+            }}
             onLoadedData={() => setVideoReady(true)}
             onPlay={() => setPlaying(true)}
             onPause={() => setPlaying(false)}
@@ -350,7 +385,13 @@ export default function TeamMorphSurface({ member, origin, sourceElement, onClos
 
         <motion.div
           className={styles.profileOrbitFrame}
-          style={{ left: orbitLeft, top: orbitTop, width: orbitSize, height: orbitSize }}
+          style={{
+            left: orbitLeft,
+            top: orbitTop,
+            width: orbitSize,
+            height: orbitSize,
+            willChange: "transform, opacity",
+          }}
           initial={{ opacity: 0, scale: 0.88, rotate: -8 }}
           animate={{ opacity: open ? 1 : 0, scale: open ? 1 : 0.9, rotate: open ? 0 : -6 }}
           transition={{ duration: reducedMotion ? 0.1 : 0.5, delay: open && !reducedMotion ? 0.18 : 0 }}
@@ -362,7 +403,12 @@ export default function TeamMorphSurface({ member, origin, sourceElement, onClos
         <motion.div
           className={styles.profileDetails}
           data-layout={layout.details.mode}
-          style={{ left: layout.details.left, top: layout.details.top, width: layout.details.width }}
+          style={{
+            left: layout.details.left,
+            top: layout.details.top,
+            width: layout.details.width,
+            willChange: "transform, opacity",
+          }}
           initial={{ opacity: 0, y: reducedMotion ? 0 : 18 }}
           animate={{
             opacity: open ? 1 : 0,
