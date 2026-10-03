@@ -71,6 +71,7 @@ function setStaticState(root: HTMLElement) {
     path.style.strokeDasharray = "none";
     path.style.strokeDashoffset = "0";
   });
+  root.querySelector<HTMLElement>("[data-system-track]")?.style.setProperty("--track-progress", "1");
   root.querySelector<HTMLElement>("[data-bridge]")?.style.setProperty("--bridge-progress", "1");
   const platform = root.querySelector<HTMLElement>("[data-platform-section]");
   platform?.style.setProperty("--platform-main", "1");
@@ -146,6 +147,15 @@ function installMotion(root: HTMLElement): () => void {
     gsap.set(path, { strokeDasharray: length, strokeDashoffset: length });
     animations.push(gsap.to(path, { strokeDashoffset: 0, ease: "none", scrollTrigger: { trigger: path.closest("section") ?? path, start: "top 82%", end: "bottom 48%", scrub: 0.5 } }));
   });
+
+  const systemTrack = root.querySelector<HTMLElement>("[data-system-track]");
+  if (systemTrack) {
+    animations.push(gsap.fromTo(systemTrack, { "--track-progress": 0 }, {
+      "--track-progress": 1,
+      ease: "none",
+      scrollTrigger: { trigger: systemTrack, start: "top 82%", end: "bottom 44%", scrub: 0.5 },
+    }));
+  }
 
   const engine = root.querySelector<HTMLElement>("[data-engine-section]");
   const enginePaths = Array.from(root.querySelectorAll<SVGPathElement>("[data-engine-path]"));
