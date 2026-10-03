@@ -2,41 +2,77 @@
   --cubeiq-shell: min(calc(100% - 48px), 1200px);
 }
 
-#cubeiq-page [data-engine-section],
-#cubeiq-page [data-bridge],
-#cubeiq-page [data-platform-section],
-#cubeiq-page [data-relationship] {
-  position: relative;
-  overflow: visible !important;
+#cubeiq-page section {
+  scroll-margin-top: 96px;
 }
 
-#cubeiq-page [data-engine-section] { min-height: 360svh; }
-#cubeiq-page [data-bridge] { min-height: 180svh; }
-#cubeiq-page [data-platform-section] { min-height: 210svh; }
-#cubeiq-page [data-relationship] { min-height: 180svh; }
-
-#cubeiq-page [data-engine-pin] {
-  position: sticky !important;
-  top: 0;
-  min-height: 100svh;
-  height: 100svh;
-  overflow: hidden;
-  transform: translateZ(0);
-  will-change: transform;
-}
-
+/* Keep the original GSAP pin model on desktop. These rules only make the
+   pinned surfaces cheaper to composite and keep their geometry predictable. */
+#cubeiq-page [data-engine-pin],
 #cubeiq-page [data-bridge-pin],
 #cubeiq-page [data-platform-pin],
 #cubeiq-page [data-relationship-pin] {
-  position: sticky !important;
-  top: 92px;
-  align-self: start;
+  backface-visibility: hidden;
   transform: translateZ(0);
 }
 
-#cubeiq-page [data-bridge-pin] { min-height: min(620px, calc(100svh - 124px)); }
-#cubeiq-page [data-platform-pin] { min-height: 650px; margin-top: 34px; }
-#cubeiq-page [data-relationship-pin] { min-height: min(640px, calc(100svh - 120px)); }
+#cubeiq-page [data-engine-step],
+#cubeiq-page [data-difference-item],
+#cubeiq-page [data-platform-card] {
+  backface-visibility: hidden;
+}
+
+/* Growth engine: preserve the pinned composition while giving the active card
+   a stable responsive rail instead of allowing it to collide with the orbit. */
+#cubeiq-page [data-engine-pin] > div:last-child {
+  right: max(24px, calc((100vw - 1200px) / 2));
+  bottom: clamp(28px, 5vh, 58px);
+  width: clamp(300px, 27vw, 360px);
+  height: 236px;
+  contain: layout paint;
+}
+
+#cubeiq-page [data-engine-step] {
+  padding: clamp(20px, 2.1vw, 26px) !important;
+  transform: translate3d(0, 18px, 0) scale(0.985) !important;
+  will-change: opacity, transform;
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
+}
+
+#cubeiq-page [data-engine-step][data-active] {
+  transform: translate3d(0, 0, 0) scale(1) !important;
+}
+
+/* The problem diagram has five named journey stages. Position those labels at
+   the actual SVG node x-coordinates instead of distributing them evenly. */
+#cubeiq-page [data-system-track] > div:first-child {
+  position: relative;
+  display: block;
+  height: 20px;
+}
+
+#cubeiq-page [data-system-track] > div:first-child > span {
+  position: absolute;
+  top: 0;
+  width: max-content;
+  transform: translateX(-50%);
+  text-align: center !important;
+}
+
+#cubeiq-page [data-system-track] > div:first-child > span:nth-child(1) { left: 3.33%; transform: none; }
+#cubeiq-page [data-system-track] > div:first-child > span:nth-child(2) { left: 23.75%; }
+#cubeiq-page [data-system-track] > div:first-child > span:nth-child(3) { left: 43.33%; }
+#cubeiq-page [data-system-track] > div:first-child > span:nth-child(4) { left: 63.33%; }
+#cubeiq-page [data-system-track] > div:first-child > span:nth-child(5) { right: 3.33%; left: auto; transform: none; }
+
+#cubeiq-page [data-system-track] > svg {
+  display: block;
+  width: 100% !important;
+  max-width: 100%;
+  height: auto;
+  transform: none !important;
+}
 
 #cubeiq-page [data-method-track-enhanced] {
   grid-template-columns: repeat(4, minmax(0, 1fr)) !important;
@@ -49,42 +85,45 @@
   height: 100%;
 }
 
-#cubeiq-page section { scroll-margin-top: 96px; }
+@media (max-width: 1180px) and (min-width: 901px) {
+  #cubeiq-page [data-engine-pin] > div:last-child {
+    right: 22px;
+    bottom: 26px;
+    width: clamp(280px, 31vw, 330px);
+    height: 220px;
+  }
 
-#cubeiq-page [data-platform-card],
-#cubeiq-page [data-engine-step],
-#cubeiq-page [data-difference-item] {
-  backface-visibility: hidden;
+  #cubeiq-page [data-engine-step] h3 {
+    font-size: clamp(23px, 2.7vw, 32px) !important;
+  }
+
+  #cubeiq-page [data-engine-step] p {
+    font-size: 14px !important;
+    line-height: 1.5 !important;
+  }
 }
 
 @media (max-width: 1100px) {
-  #cubeiq-page [data-method-track-enhanced] { grid-template-columns: repeat(3, minmax(0, 1fr)) !important; }
+  #cubeiq-page [data-method-track-enhanced] {
+    grid-template-columns: repeat(3, minmax(0, 1fr)) !important;
+  }
 }
 
+/* Pins intentionally stop below desktop widths. At this size the content is
+   laid out normally so cards never overlap or become unreadable. */
 @media (max-width: 900px) {
-  #cubeiq-page [data-engine-section],
-  #cubeiq-page [data-bridge],
-  #cubeiq-page [data-platform-section],
-  #cubeiq-page [data-relationship] {
-    min-height: auto !important;
-    overflow: hidden !important;
-  }
-
   #cubeiq-page [data-engine-pin],
   #cubeiq-page [data-bridge-pin],
   #cubeiq-page [data-platform-pin],
   #cubeiq-page [data-relationship-pin] {
-    position: relative !important;
-    inset: auto !important;
-    top: auto !important;
-    height: auto !important;
-    min-height: auto !important;
     transform: none !important;
     will-change: auto;
   }
 
   #cubeiq-page [data-engine-pin] {
     display: block !important;
+    height: auto !important;
+    min-height: auto !important;
     padding: 72px 0 !important;
   }
 
@@ -97,17 +136,27 @@
     inset: auto !important;
     width: min(calc(100% - 40px), 760px) !important;
     height: auto !important;
-    margin: 28px auto 0 !important;
+    margin: 32px auto 0 !important;
     display: grid !important;
     grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
-    gap: 1px !important;
-    overflow: hidden;
+    gap: 10px !important;
+    overflow: visible;
+    contain: none;
   }
 
   #cubeiq-page [data-engine-step] {
     position: relative !important;
     inset: auto !important;
-    min-height: 210px;
+    min-height: 190px;
+    opacity: 1 !important;
+    transform: none !important;
+    will-change: auto;
+  }
+
+  #cubeiq-page [data-difference-item],
+  #cubeiq-page [data-platform-card] {
+    opacity: 1 !important;
+    transform: none !important;
   }
 
   #cubeiq-page [data-relationship-pin] {
@@ -115,14 +164,13 @@
     gap: 28px !important;
   }
 
-  #cubeiq-page [data-engine-step],
-  #cubeiq-page [data-difference-item],
-  #cubeiq-page [data-platform-card] {
-    opacity: 1 !important;
-    transform: none !important;
+  #cubeiq-page [data-method-track-enhanced] {
+    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
   }
 
-  #cubeiq-page [data-method-track-enhanced] { grid-template-columns: repeat(2, minmax(0, 1fr)) !important; }
+  #cubeiq-page [data-system-track] > div:first-child {
+    height: 18px;
+  }
 }
 
 @media (max-width: 640px) {
@@ -130,20 +178,33 @@
   #cubeiq-page [data-method-track-enhanced] {
     grid-template-columns: 1fr !important;
   }
+
+  #cubeiq-page [data-engine-step] {
+    min-height: 0;
+  }
+
+  #cubeiq-page [data-system-track] {
+    padding-top: 30px !important;
+  }
+
+  #cubeiq-page [data-system-track] > div:first-child {
+    display: none !important;
+  }
+
+  #cubeiq-page [data-system-track] > svg {
+    width: 116% !important;
+    max-width: none;
+    margin-left: -8%;
+  }
 }
 
 @media (prefers-reduced-motion: reduce) {
-  #cubeiq-page [data-engine-section],
-  #cubeiq-page [data-bridge],
-  #cubeiq-page [data-platform-section],
-  #cubeiq-page [data-relationship] { min-height: auto !important; }
-
   #cubeiq-page [data-engine-pin],
   #cubeiq-page [data-bridge-pin],
   #cubeiq-page [data-platform-pin],
   #cubeiq-page [data-relationship-pin] {
     position: relative !important;
-    top: auto !important;
-    height: auto !important;
+    inset: auto !important;
+    transform: none !important;
   }
 }
