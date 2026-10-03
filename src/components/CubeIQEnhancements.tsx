@@ -87,6 +87,7 @@ function installAudienceTabs(root: HTMLElement): () => void {
   const tabs = Array.from(tablist.querySelectorAll<HTMLButtonElement>('[role="tab"]'));
   panel.id = "cubeiq-audience-panel";
   panel.tabIndex = 0;
+
   const sync = () => {
     tabs.forEach((tab, index) => {
       tab.id = `cubeiq-audience-tab-${index}`;
@@ -96,6 +97,7 @@ function installAudienceTabs(root: HTMLElement): () => void {
     const selected = tabs.find((tab) => tab.getAttribute("aria-selected") === "true");
     if (selected) panel.setAttribute("aria-labelledby", selected.id);
   };
+
   const onKeyDown = (event: KeyboardEvent) => {
     if (!["ArrowDown", "ArrowRight", "ArrowUp", "ArrowLeft", "Home", "End"].includes(event.key)) return;
     const current = tabs.indexOf(document.activeElement as HTMLButtonElement);
@@ -110,6 +112,7 @@ function installAudienceTabs(root: HTMLElement): () => void {
     tabs[next].click();
     requestAnimationFrame(sync);
   };
+
   sync();
   tablist.addEventListener("keydown", onKeyDown);
   const observer = new MutationObserver(sync);
@@ -122,6 +125,9 @@ function installAudienceTabs(root: HTMLElement): () => void {
 
 function installMotion(root: HTMLElement): () => void {
   gsap.registerPlugin(ScrollTrigger);
+
+  // The base page mounts its own triggers first. Remove those once, then own a
+  // single optimized motion lifecycle for CubeIQ.
   ScrollTrigger.getAll().forEach((trigger) => {
     const target = trigger.trigger;
     if (target instanceof Element && root.contains(target)) trigger.kill(true);
@@ -133,131 +139,210 @@ function installMotion(root: HTMLElement): () => void {
   }
   delete root.dataset.motion;
 
-  const animations: gsap.core.Animation[] = [];
-  root.querySelectorAll<HTMLElement>("[data-reveal]").forEach((element) => {
-    animations.push(gsap.fromTo(element, { y: 22, opacity: 0 }, { y: 0, opacity: 1, duration: 0.68, ease: "power3.out", scrollTrigger: { trigger: element, start: "top 90%", once: true } }));
-  });
-  root.querySelectorAll<HTMLElement>("[data-cubeiq-split]").forEach((element) => {
-    const parts = element.querySelectorAll<HTMLElement>(".cubeiq-split-part");
-    animations.push(gsap.fromTo(parts, { yPercent: 102, opacity: 0 }, { yPercent: 0, opacity: 1, duration: 0.76, stagger: 0.03, ease: "power4.out", scrollTrigger: { trigger: element, start: "top 90%", once: true } }));
-  });
-  root.querySelectorAll<SVGPathElement>("[data-draw-path]").forEach((path) => {
-    if (path.closest("[data-engine-section]")) return;
-    const length = path.getTotalLength();
-    gsap.set(path, { strokeDasharray: length, strokeDashoffset: length });
-    animations.push(gsap.to(path, { strokeDashoffset: 0, ease: "none", scrollTrigger: { trigger: path.closest("section") ?? path, start: "top 82%", end: "bottom 48%", scrub: 0.5 } }));
-  });
+  const mm = gsap.matchMedia();
+  mm.add(
+    {
+      desktop: "(min-width: 901px)",
+      compact: "(max-width: 900px)",
+    },
+    (context) => {
+      const desktop = Boolean(context.conditions?.desktop);
+      const animations: gsap.core.Animation[] = [];
 
-  const systemTrack = root.querySelector<HTMLElement>("[data-system-track]");
-  if (systemTrack) {
-    animations.push(gsap.fromTo(systemTrack, { "--track-progress": 0 }, {
-      "--track-progress": 1,
-      ease: "none",
-      scrollTrigger: { trigger: systemTrack, start: "top 82%", end: "bottom 44%", scrub: 0.5 },
-    }));
-  }
+      root.querySelectorAll<HTMLElement>("[data-reveal]").forEach((element) => {
+        animations.push(gsap.fromTo(element, { y: 22, opacity: 0 }, { y: 0, opacity: 1, duration: 0.68, ease: "power3.out", scrollTrigger: { trigger: element, start: "top 90%", once: true } }));
+      });
 
-  const engine = root.querySelector<HTMLElement>("[data-engine-section]");
-  const enginePaths = Array.from(root.querySelectorAll<SVGPathElement>("[data-engine-path]"));
-  const engineWords = Array.from(root.querySelectorAll<HTMLElement>("[data-engine-word]"));
-  const engineSteps = Array.from(root.querySelectorAll<HTMLElement>("[data-engine-step]"));
-  let engineActive = -1;
-  enginePaths.forEach((path) => {
-    const length = path.getTotalLength();
-    path.dataset.pathLength = String(length);
-    gsap.set(path, { strokeDasharray: length, strokeDashoffset: length });
-  });
-  if (engine && engineSteps.length) {
-    ScrollTrigger.create({
-      trigger: engine,
-      start: "top top",
-      end: "bottom bottom",
-      scrub: 0.35,
-      onUpdate: ({ progress }) => {
+      root.querySelectorAll<HTMLElement>("[data-cubeiq-split]").forEach((element) => {
+        const parts = element.querySelectorAll<HTMLElement>(".cubeiq-split-part");
+        animations.push(gsap.fromTo(parts, { yPercent: 102, opacity: 0 }, { yPercent: 0, opacity: 1, duration: 0.76, stagger: 0.03, ease: "power4.out", scrollTrigger: { trigger: element, start: "top 90%", once: true } }));
+      });
+
+      root.querySelectorAll<SVGPathElement>("[data-draw-path]").forEach((path) => {
+        if (path.closest("[data-engine-section]")) return;
+        const length = path.getTotalLength();
+        gsap.set(path, { strokeDasharray: length, strokeDashoffset: length });
+        animations.push(gsap.to(path, { strokeDashoffset: 0, ease: "none", scrollTrigger: { trigger: path.closest("section") ?? path, start: "top 82%", end: "bottom 48%", scrub: 0.5 } }));
+      });
+
+      const systemTrack = root.querySelector<HTMLElement>("[data-system-track]");
+      if (systemTrack) {
+        animations.push(gsap.fromTo(systemTrack, { "--track-progress": 0 }, {
+          "--track-progress": 1,
+          ease: "none",
+          scrollTrigger: { trigger: systemTrack, start: "top 82%", end: "bottom 44%", scrub: 0.5 },
+        }));
+      }
+
+      const engine = root.querySelector<HTMLElement>("[data-engine-section]");
+      const enginePin = root.querySelector<HTMLElement>("[data-engine-pin]");
+      const enginePaths = Array.from(root.querySelectorAll<SVGPathElement>("[data-engine-path]"));
+      const engineWords = Array.from(root.querySelectorAll<HTMLElement>("[data-engine-word]"));
+      const engineSteps = Array.from(root.querySelectorAll<HTMLElement>("[data-engine-step]"));
+      let engineActive = -1;
+
+      enginePaths.forEach((path) => {
+        const length = path.getTotalLength();
+        path.dataset.pathLength = String(length);
+        gsap.set(path, { strokeDasharray: length, strokeDashoffset: length });
+      });
+
+      const setEngine = (progress: number) => {
         root.style.setProperty("--engine-progress", String(progress));
         enginePaths.forEach((path) => gsap.set(path, { strokeDashoffset: Number(path.dataset.pathLength || 0) * (1 - progress) }));
         const active = Math.min(engineSteps.length - 1, Math.max(0, Math.floor(progress * engineSteps.length)));
         if (active !== engineActive) {
           engineActive = active;
+          root.style.setProperty("--engine-index", String(active));
           engineSteps.forEach((node, index) => node.toggleAttribute("data-active", index === active));
           engineWords.forEach((node, index) => node.toggleAttribute("data-active", index === active));
         }
-      },
-    });
-  }
+      };
 
-  const bridge = root.querySelector<HTMLElement>("[data-bridge]");
-  const bridgeSteps = Array.from(root.querySelectorAll<HTMLElement>("[data-bridge-step]"));
-  const differenceItems = Array.from(root.querySelectorAll<HTMLElement>("[data-difference-item]"));
-  let bridgeActive = -1;
-  if (bridge) {
-    ScrollTrigger.create({
-      trigger: bridge,
-      start: "top top+=80",
-      end: "bottom bottom",
-      scrub: 0.3,
-      onUpdate: ({ progress }) => {
-        bridge.style.setProperty("--bridge-progress", String(progress));
+      if (engine && enginePin && engineSteps.length && desktop) {
+        setEngine(0);
+        ScrollTrigger.create({
+          trigger: engine,
+          start: "top top",
+          end: () => `+=${Math.max(window.innerHeight * 5.2, engineSteps.length * 390)}`,
+          pin: enginePin,
+          pinSpacing: true,
+          scrub: 0.52,
+          anticipatePin: 1,
+          invalidateOnRefresh: true,
+          refreshPriority: 4,
+          onUpdate: ({ progress }) => setEngine(progress),
+          onLeave: () => setEngine(1),
+          onEnterBack: ({ progress }) => setEngine(progress),
+        });
+      } else if (engine) {
+        root.style.setProperty("--engine-progress", "1");
+        engineSteps.forEach((node) => node.setAttribute("data-active", ""));
+        engineWords.forEach((node) => node.removeAttribute("data-active"));
+        enginePaths.forEach((path) => gsap.set(path, { strokeDashoffset: 0 }));
+      }
+
+      const bridge = root.querySelector<HTMLElement>("[data-bridge]");
+      const bridgePin = root.querySelector<HTMLElement>("[data-bridge-pin]");
+      const bridgeSteps = Array.from(root.querySelectorAll<HTMLElement>("[data-bridge-step]"));
+      const differenceItems = Array.from(root.querySelectorAll<HTMLElement>("[data-difference-item]"));
+      let bridgeActive = -1;
+
+      const setBridge = (progress: number) => {
+        bridge?.style.setProperty("--bridge-progress", String(progress));
         const active = Math.min(differenceItems.length - 1, Math.max(0, Math.floor(progress * differenceItems.length)));
         if (active !== bridgeActive) {
           bridgeActive = active;
           bridgeSteps.forEach((node, index) => node.toggleAttribute("data-active", index <= active + 1));
           differenceItems.forEach((node, index) => node.toggleAttribute("data-active", index <= active));
         }
-      },
-    });
-  }
+      };
 
-  const platform = root.querySelector<HTMLElement>("[data-platform-section]");
-  const cards = Array.from(root.querySelectorAll<HTMLElement>("[data-platform-card]"));
-  let platformCount = -1;
-  if (platform) {
-    ScrollTrigger.create({
-      trigger: platform,
-      start: "top top+=80",
-      end: "bottom bottom",
-      scrub: 0.35,
-      onUpdate: ({ progress }) => {
+      if (bridge && bridgePin && desktop) {
+        setBridge(0);
+        ScrollTrigger.create({
+          trigger: bridgePin,
+          start: "top 11%",
+          end: () => `+=${Math.max(window.innerHeight * 1.9, 1450)}`,
+          pin: bridgePin,
+          pinSpacing: true,
+          scrub: 0.54,
+          anticipatePin: 1,
+          invalidateOnRefresh: true,
+          refreshPriority: 3,
+          onUpdate: ({ progress }) => setBridge(progress),
+          onLeave: () => setBridge(1),
+          onEnterBack: ({ progress }) => setBridge(progress),
+        });
+      } else if (bridge) {
+        setBridge(1);
+        bridgeSteps.forEach((node) => node.setAttribute("data-active", ""));
+        differenceItems.forEach((node) => node.setAttribute("data-active", ""));
+      }
+
+      const platform = root.querySelector<HTMLElement>("[data-platform-section]");
+      const platformPin = root.querySelector<HTMLElement>("[data-platform-pin]");
+      const cards = Array.from(root.querySelectorAll<HTMLElement>("[data-platform-card]"));
+      let platformCount = -1;
+
+      const setPlatform = (progress: number) => {
+        if (!platform) return;
         const clamp = (value: number) => Math.min(1, Math.max(0, value));
         platform.style.setProperty("--platform-main", String(clamp(progress / 0.2)));
         platform.style.setProperty("--platform-branch", String(clamp((progress - 0.16) / 0.42)));
         platform.style.setProperty("--platform-drop", String(clamp((progress - 0.52) / 0.38)));
-        const count = Math.round(progress * cards.length);
+        const count = Math.min(cards.length, Math.max(0, Math.round(progress * cards.length)));
         if (count !== platformCount) {
           platformCount = count;
           cards.forEach((card, index) => card.toggleAttribute("data-active", index < count));
         }
-      },
-    });
-  }
+      };
 
-  const relationship = root.querySelector<HTMLElement>("[data-relationship]");
-  const relationshipPaths = Array.from(root.querySelectorAll<SVGPathElement>("[data-relationship-path]"));
-  relationshipPaths.forEach((path) => {
-    const length = path.getTotalLength();
-    path.dataset.pathLength = String(length);
-    gsap.set(path, { strokeDasharray: length, strokeDashoffset: length });
-  });
-  if (relationship) {
-    ScrollTrigger.create({
-      trigger: relationship,
-      start: "top top+=80",
-      end: "bottom bottom",
-      scrub: 0.35,
-      onUpdate: ({ progress }) => {
-        relationship.style.setProperty("--relationship-progress", String(progress));
+      if (platform && platformPin && desktop) {
+        setPlatform(0);
+        ScrollTrigger.create({
+          trigger: platformPin,
+          start: "top 11%",
+          end: () => `+=${Math.max(window.innerHeight * 2.7, 2150)}`,
+          pin: platformPin,
+          pinSpacing: true,
+          scrub: 0.58,
+          anticipatePin: 1,
+          invalidateOnRefresh: true,
+          refreshPriority: 3,
+          onUpdate: ({ progress }) => setPlatform(progress),
+          onLeave: () => setPlatform(1),
+          onEnterBack: ({ progress }) => setPlatform(progress),
+        });
+      } else if (platform) {
+        setPlatform(1);
+        cards.forEach((card) => card.setAttribute("data-active", ""));
+      }
+
+      const relationship = root.querySelector<HTMLElement>("[data-relationship]");
+      const relationshipPin = root.querySelector<HTMLElement>("[data-relationship-pin]");
+      const relationshipPaths = Array.from(root.querySelectorAll<SVGPathElement>("[data-relationship-path]"));
+      relationshipPaths.forEach((path) => {
+        const length = path.getTotalLength();
+        path.dataset.pathLength = String(length);
+        gsap.set(path, { strokeDasharray: length, strokeDashoffset: length });
+      });
+
+      const setRelationship = (progress: number) => {
+        relationship?.style.setProperty("--relationship-progress", String(progress));
         relationshipPaths.forEach((path) => gsap.set(path, { strokeDashoffset: Number(path.dataset.pathLength || 0) * (1 - progress) }));
-      },
-    });
-  }
+      };
+
+      if (relationship && relationshipPin && desktop) {
+        setRelationship(0);
+        ScrollTrigger.create({
+          trigger: relationshipPin,
+          start: "top 11%",
+          end: () => `+=${Math.max(window.innerHeight * 1.8, 1400)}`,
+          pin: relationshipPin,
+          pinSpacing: true,
+          scrub: 0.58,
+          anticipatePin: 1,
+          invalidateOnRefresh: true,
+          refreshPriority: 2,
+          onUpdate: ({ progress }) => setRelationship(progress),
+          onLeave: () => setRelationship(1),
+          onEnterBack: ({ progress }) => setRelationship(progress),
+        });
+      } else if (relationship) {
+        setRelationship(1);
+      }
+
+      return () => animations.forEach((animation) => animation.kill());
+    },
+  );
 
   const refreshId = requestAnimationFrame(() => ScrollTrigger.refresh());
-  if (document.fonts) {
-    void document.fonts.ready.then(() => ScrollTrigger.refresh());
-  }
+  if (document.fonts) void document.fonts.ready.then(() => ScrollTrigger.refresh());
+
   return () => {
     cancelAnimationFrame(refreshId);
-    animations.forEach((animation) => animation.kill());
+    mm.revert();
     ScrollTrigger.getAll().forEach((trigger) => {
       const target = trigger.trigger;
       if (target instanceof Element && root.contains(target)) trigger.kill(true);
