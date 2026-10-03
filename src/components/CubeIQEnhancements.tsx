@@ -79,10 +79,10 @@ function setStaticState(root: HTMLElement) {
   root.querySelector<HTMLElement>("[data-relationship]")?.style.setProperty("--relationship-progress", "1");
 }
 
-function installAudienceTabs(root: HTMLElement) {
+function installAudienceTabs(root: HTMLElement): () => void {
   const tablist = root.querySelector<HTMLElement>('[role="tablist"]');
   const panel = root.querySelector<HTMLElement>('[role="tabpanel"]');
-  if (!tablist || !panel) return () => undefined;
+  if (!tablist || !panel) return () => {};
   const tabs = Array.from(tablist.querySelectorAll<HTMLButtonElement>('[role="tab"]'));
   panel.id = "cubeiq-audience-panel";
   panel.tabIndex = 0;
@@ -119,7 +119,7 @@ function installAudienceTabs(root: HTMLElement) {
   };
 }
 
-function installMotion(root: HTMLElement) {
+function installMotion(root: HTMLElement): () => void {
   gsap.registerPlugin(ScrollTrigger);
   ScrollTrigger.getAll().forEach((trigger) => {
     const target = trigger.trigger;
@@ -128,7 +128,7 @@ function installMotion(root: HTMLElement) {
 
   if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
     setStaticState(root);
-    return () => undefined;
+    return () => {};
   }
   delete root.dataset.motion;
 
@@ -289,7 +289,7 @@ export default function CubeIQEnhancements() {
 
     setHosts({ hero: heroHost, method: methodHost });
     const cleanupTabs = installAudienceTabs(root);
-    let cleanupMotion = () => undefined;
+    let cleanupMotion: () => void = () => {};
     const frame = requestAnimationFrame(() => {
       cleanupMotion = installMotion(root);
     });
