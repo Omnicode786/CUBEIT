@@ -9,7 +9,6 @@ import { ScrollTrigger } from "gsap/ScrollTrigger";
 import { MagneticLink } from "./MagneticLink";
 import { methodSteps } from "./cubeiq.data";
 import styles from "./cubeiq-enhancements.module.css";
-import stability from "./cubeiq-stability.module.css";
 
 type PortalHosts = { hero: HTMLElement | null; method: HTMLElement | null };
 
@@ -262,7 +261,6 @@ export default function CubeIQEnhancements() {
   useEffect(() => {
     const root = document.getElementById("cubeiq-page");
     if (!root) return;
-    root.classList.add(stability.loaded);
 
     const heroSection = root.querySelector<HTMLElement>("#home");
     let heroHost = document.getElementById("cubeiq-hero-v2-root");
@@ -300,7 +298,6 @@ export default function CubeIQEnhancements() {
       cancelAnimationFrame(frame);
       cleanupTabs();
       cleanupMotion();
-      root.classList.remove(stability.loaded);
       heroSection?.removeAttribute("data-hero-v2");
       heroHost?.remove();
       methodHost?.remove();
