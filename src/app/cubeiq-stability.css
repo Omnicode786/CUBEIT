@@ -8,13 +8,12 @@
 #cubeiq-page [data-relationship] {
   position: relative;
   overflow: visible !important;
-  contain: layout style;
 }
 
-#cubeiq-page [data-engine-section] { min-height: 480svh; }
-#cubeiq-page [data-bridge] { min-height: 230svh; }
-#cubeiq-page [data-platform-section] { min-height: 260svh; }
-#cubeiq-page [data-relationship] { min-height: 220svh; }
+#cubeiq-page [data-engine-section] { min-height: 360svh; }
+#cubeiq-page [data-bridge] { min-height: 180svh; }
+#cubeiq-page [data-platform-section] { min-height: 210svh; }
+#cubeiq-page [data-relationship] { min-height: 180svh; }
 
 #cubeiq-page [data-engine-pin] {
   position: sticky !important;
@@ -69,7 +68,6 @@
   #cubeiq-page [data-relationship] {
     min-height: auto !important;
     overflow: hidden !important;
-    contain: none;
   }
 
   #cubeiq-page [data-engine-pin],
@@ -85,6 +83,38 @@
     will-change: auto;
   }
 
+  #cubeiq-page [data-engine-pin] {
+    display: block !important;
+    padding: 72px 0 !important;
+  }
+
+  #cubeiq-page [data-engine-pin] > div:first-child {
+    grid-template-columns: 1fr !important;
+  }
+
+  #cubeiq-page [data-engine-pin] > div:last-child {
+    position: relative !important;
+    inset: auto !important;
+    width: min(calc(100% - 40px), 760px) !important;
+    height: auto !important;
+    margin: 28px auto 0 !important;
+    display: grid !important;
+    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+    gap: 1px !important;
+    overflow: hidden;
+  }
+
+  #cubeiq-page [data-engine-step] {
+    position: relative !important;
+    inset: auto !important;
+    min-height: 210px;
+  }
+
+  #cubeiq-page [data-relationship-pin] {
+    grid-template-columns: 1fr !important;
+    gap: 28px !important;
+  }
+
   #cubeiq-page [data-engine-step],
   #cubeiq-page [data-difference-item],
   #cubeiq-page [data-platform-card] {
@@ -96,7 +126,10 @@
 }
 
 @media (max-width: 640px) {
-  #cubeiq-page [data-method-track-enhanced] { grid-template-columns: 1fr !important; }
+  #cubeiq-page [data-engine-pin] > div:last-child,
+  #cubeiq-page [data-method-track-enhanced] {
+    grid-template-columns: 1fr !important;
+  }
 }
 
 @media (prefers-reduced-motion: reduce) {
