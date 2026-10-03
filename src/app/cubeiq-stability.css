@@ -74,6 +74,20 @@
   transform: none !important;
 }
 
+/* The original decorative dots were not actually sitting on the bezier curve.
+   Pin the visible five journey nodes to sampled coordinates on that same path. */
+#cubeiq-page [data-system-track] > svg > g {
+  transform-box: view-box;
+  transform-origin: 0 0;
+}
+
+#cubeiq-page [data-system-track] > svg > g:nth-of-type(1) { transform: translate(40px, 210px) !important; }
+#cubeiq-page [data-system-track] > svg > g:nth-of-type(2) { transform: translate(285px, 234px) !important; }
+#cubeiq-page [data-system-track] > svg > g:nth-of-type(3) { transform: translate(520px, 117px) !important; }
+#cubeiq-page [data-system-track] > svg > g:nth-of-type(4) { transform: translate(760px, 210px) !important; }
+#cubeiq-page [data-system-track] > svg > g:nth-of-type(5) { display: none; }
+#cubeiq-page [data-system-track] > svg > g:nth-of-type(6) { transform: translate(1160px, 165px) !important; }
+
 #cubeiq-page [data-method-track-enhanced] {
   grid-template-columns: repeat(4, minmax(0, 1fr)) !important;
   align-items: stretch;
