@@ -1,0 +1,116 @@
+#cubeiq-page {
+  --cubeiq-shell: min(calc(100% - 48px), 1200px);
+}
+
+#cubeiq-page [data-engine-section],
+#cubeiq-page [data-bridge],
+#cubeiq-page [data-platform-section],
+#cubeiq-page [data-relationship] {
+  position: relative;
+  overflow: visible !important;
+  contain: layout style;
+}
+
+#cubeiq-page [data-engine-section] { min-height: 480svh; }
+#cubeiq-page [data-bridge] { min-height: 230svh; }
+#cubeiq-page [data-platform-section] { min-height: 260svh; }
+#cubeiq-page [data-relationship] { min-height: 220svh; }
+
+#cubeiq-page [data-engine-pin] {
+  position: sticky !important;
+  top: 0;
+  min-height: 100svh;
+  height: 100svh;
+  overflow: hidden;
+  transform: translateZ(0);
+  will-change: transform;
+}
+
+#cubeiq-page [data-bridge-pin],
+#cubeiq-page [data-platform-pin],
+#cubeiq-page [data-relationship-pin] {
+  position: sticky !important;
+  top: 92px;
+  align-self: start;
+  transform: translateZ(0);
+}
+
+#cubeiq-page [data-bridge-pin] { min-height: min(620px, calc(100svh - 124px)); }
+#cubeiq-page [data-platform-pin] { min-height: 650px; margin-top: 34px; }
+#cubeiq-page [data-relationship-pin] { min-height: min(640px, calc(100svh - 120px)); }
+
+#cubeiq-page [data-method-track-enhanced] {
+  grid-template-columns: repeat(4, minmax(0, 1fr)) !important;
+  align-items: stretch;
+}
+
+#cubeiq-page [data-method-track-enhanced] > article,
+#cubeiq-page [data-method-track-enhanced] > #cubeiq-method-extra > article {
+  min-width: 0;
+  height: 100%;
+}
+
+#cubeiq-page section { scroll-margin-top: 96px; }
+
+#cubeiq-page [data-platform-card],
+#cubeiq-page [data-engine-step],
+#cubeiq-page [data-difference-item] {
+  backface-visibility: hidden;
+}
+
+@media (max-width: 1100px) {
+  #cubeiq-page [data-method-track-enhanced] { grid-template-columns: repeat(3, minmax(0, 1fr)) !important; }
+}
+
+@media (max-width: 900px) {
+  #cubeiq-page [data-engine-section],
+  #cubeiq-page [data-bridge],
+  #cubeiq-page [data-platform-section],
+  #cubeiq-page [data-relationship] {
+    min-height: auto !important;
+    overflow: hidden !important;
+    contain: none;
+  }
+
+  #cubeiq-page [data-engine-pin],
+  #cubeiq-page [data-bridge-pin],
+  #cubeiq-page [data-platform-pin],
+  #cubeiq-page [data-relationship-pin] {
+    position: relative !important;
+    inset: auto !important;
+    top: auto !important;
+    height: auto !important;
+    min-height: auto !important;
+    transform: none !important;
+    will-change: auto;
+  }
+
+  #cubeiq-page [data-engine-step],
+  #cubeiq-page [data-difference-item],
+  #cubeiq-page [data-platform-card] {
+    opacity: 1 !important;
+    transform: none !important;
+  }
+
+  #cubeiq-page [data-method-track-enhanced] { grid-template-columns: repeat(2, minmax(0, 1fr)) !important; }
+}
+
+@media (max-width: 640px) {
+  #cubeiq-page [data-method-track-enhanced] { grid-template-columns: 1fr !important; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  #cubeiq-page [data-engine-section],
+  #cubeiq-page [data-bridge],
+  #cubeiq-page [data-platform-section],
+  #cubeiq-page [data-relationship] { min-height: auto !important; }
+
+  #cubeiq-page [data-engine-pin],
+  #cubeiq-page [data-bridge-pin],
+  #cubeiq-page [data-platform-pin],
+  #cubeiq-page [data-relationship-pin] {
+    position: relative !important;
+    top: auto !important;
+    height: auto !important;
+  }
+}
