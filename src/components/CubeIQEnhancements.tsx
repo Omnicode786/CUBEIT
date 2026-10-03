@@ -9,6 +9,7 @@ import { ScrollTrigger } from "gsap/ScrollTrigger";
 import { MagneticLink } from "./MagneticLink";
 import { methodSteps } from "./cubeiq.data";
 import styles from "./cubeiq-enhancements.module.css";
+import stability from "./cubeiq-stability.module.css";
 
 type PortalHosts = { hero: HTMLElement | null; method: HTMLElement | null };
 
@@ -105,13 +106,18 @@ function installAudienceTabs(root: HTMLElement) {
     else if (event.key === "End") next = tabs.length - 1;
     else if (event.key === "ArrowDown" || event.key === "ArrowRight") next = (current + 1) % tabs.length;
     else next = (current - 1 + tabs.length) % tabs.length;
-    tabs[next].focus(); tabs[next].click(); requestAnimationFrame(sync);
+    tabs[next].focus();
+    tabs[next].click();
+    requestAnimationFrame(sync);
   };
   sync();
   tablist.addEventListener("keydown", onKeyDown);
   const observer = new MutationObserver(sync);
   tabs.forEach((tab) => observer.observe(tab, { attributes: true, attributeFilter: ["aria-selected"] }));
-  return () => { observer.disconnect(); tablist.removeEventListener("keydown", onKeyDown); };
+  return () => {
+    observer.disconnect();
+    tablist.removeEventListener("keydown", onKeyDown);
+  };
 }
 
 function installMotion(root: HTMLElement) {
@@ -147,69 +153,99 @@ function installMotion(root: HTMLElement) {
   const engineWords = Array.from(root.querySelectorAll<HTMLElement>("[data-engine-word]"));
   const engineSteps = Array.from(root.querySelectorAll<HTMLElement>("[data-engine-step]"));
   let engineActive = -1;
-  enginePaths.forEach((path) => { const length = path.getTotalLength(); path.dataset.pathLength = String(length); gsap.set(path, { strokeDasharray: length, strokeDashoffset: length }); });
-  if (engine && engineSteps.length) ScrollTrigger.create({
-    trigger: engine, start: "top top", end: "bottom bottom", scrub: 0.35,
-    onUpdate: ({ progress }) => {
-      root.style.setProperty("--engine-progress", String(progress));
-      enginePaths.forEach((path) => gsap.set(path, { strokeDashoffset: Number(path.dataset.pathLength || 0) * (1 - progress) }));
-      const active = Math.min(engineSteps.length - 1, Math.max(0, Math.floor(progress * engineSteps.length)));
-      if (active !== engineActive) {
-        engineActive = active;
-        engineSteps.forEach((node, index) => node.toggleAttribute("data-active", index === active));
-        engineWords.forEach((node, index) => node.toggleAttribute("data-active", index === active));
-      }
-    },
+  enginePaths.forEach((path) => {
+    const length = path.getTotalLength();
+    path.dataset.pathLength = String(length);
+    gsap.set(path, { strokeDasharray: length, strokeDashoffset: length });
   });
+  if (engine && engineSteps.length) {
+    ScrollTrigger.create({
+      trigger: engine,
+      start: "top top",
+      end: "bottom bottom",
+      scrub: 0.35,
+      onUpdate: ({ progress }) => {
+        root.style.setProperty("--engine-progress", String(progress));
+        enginePaths.forEach((path) => gsap.set(path, { strokeDashoffset: Number(path.dataset.pathLength || 0) * (1 - progress) }));
+        const active = Math.min(engineSteps.length - 1, Math.max(0, Math.floor(progress * engineSteps.length)));
+        if (active !== engineActive) {
+          engineActive = active;
+          engineSteps.forEach((node, index) => node.toggleAttribute("data-active", index === active));
+          engineWords.forEach((node, index) => node.toggleAttribute("data-active", index === active));
+        }
+      },
+    });
+  }
 
   const bridge = root.querySelector<HTMLElement>("[data-bridge]");
   const bridgeSteps = Array.from(root.querySelectorAll<HTMLElement>("[data-bridge-step]"));
   const differenceItems = Array.from(root.querySelectorAll<HTMLElement>("[data-difference-item]"));
   let bridgeActive = -1;
-  if (bridge) ScrollTrigger.create({
-    trigger: bridge, start: "top top+=80", end: "bottom bottom", scrub: 0.3,
-    onUpdate: ({ progress }) => {
-      bridge.style.setProperty("--bridge-progress", String(progress));
-      const active = Math.min(differenceItems.length - 1, Math.max(0, Math.floor(progress * differenceItems.length)));
-      if (active !== bridgeActive) {
-        bridgeActive = active;
-        bridgeSteps.forEach((node, index) => node.toggleAttribute("data-active", index <= active + 1));
-        differenceItems.forEach((node, index) => node.toggleAttribute("data-active", index <= active));
-      }
-    },
-  });
+  if (bridge) {
+    ScrollTrigger.create({
+      trigger: bridge,
+      start: "top top+=80",
+      end: "bottom bottom",
+      scrub: 0.3,
+      onUpdate: ({ progress }) => {
+        bridge.style.setProperty("--bridge-progress", String(progress));
+        const active = Math.min(differenceItems.length - 1, Math.max(0, Math.floor(progress * differenceItems.length)));
+        if (active !== bridgeActive) {
+          bridgeActive = active;
+          bridgeSteps.forEach((node, index) => node.toggleAttribute("data-active", index <= active + 1));
+          differenceItems.forEach((node, index) => node.toggleAttribute("data-active", index <= active));
+        }
+      },
+    });
+  }
 
   const platform = root.querySelector<HTMLElement>("[data-platform-section]");
   const cards = Array.from(root.querySelectorAll<HTMLElement>("[data-platform-card]"));
   let platformCount = -1;
-  if (platform) ScrollTrigger.create({
-    trigger: platform, start: "top top+=80", end: "bottom bottom", scrub: 0.35,
-    onUpdate: ({ progress }) => {
-      const clamp = (value: number) => Math.min(1, Math.max(0, value));
-      platform.style.setProperty("--platform-main", String(clamp(progress / 0.2)));
-      platform.style.setProperty("--platform-branch", String(clamp((progress - 0.16) / 0.42)));
-      platform.style.setProperty("--platform-drop", String(clamp((progress - 0.52) / 0.38)));
-      const count = Math.round(progress * cards.length);
-      if (count !== platformCount) {
-        platformCount = count;
-        cards.forEach((card, index) => card.toggleAttribute("data-active", index < count));
-      }
-    },
-  });
+  if (platform) {
+    ScrollTrigger.create({
+      trigger: platform,
+      start: "top top+=80",
+      end: "bottom bottom",
+      scrub: 0.35,
+      onUpdate: ({ progress }) => {
+        const clamp = (value: number) => Math.min(1, Math.max(0, value));
+        platform.style.setProperty("--platform-main", String(clamp(progress / 0.2)));
+        platform.style.setProperty("--platform-branch", String(clamp((progress - 0.16) / 0.42)));
+        platform.style.setProperty("--platform-drop", String(clamp((progress - 0.52) / 0.38)));
+        const count = Math.round(progress * cards.length);
+        if (count !== platformCount) {
+          platformCount = count;
+          cards.forEach((card, index) => card.toggleAttribute("data-active", index < count));
+        }
+      },
+    });
+  }
 
   const relationship = root.querySelector<HTMLElement>("[data-relationship]");
   const relationshipPaths = Array.from(root.querySelectorAll<SVGPathElement>("[data-relationship-path]"));
-  relationshipPaths.forEach((path) => { const length = path.getTotalLength(); path.dataset.pathLength = String(length); gsap.set(path, { strokeDasharray: length, strokeDashoffset: length }); });
-  if (relationship) ScrollTrigger.create({
-    trigger: relationship, start: "top top+=80", end: "bottom bottom", scrub: 0.35,
-    onUpdate: ({ progress }) => {
-      relationship.style.setProperty("--relationship-progress", String(progress));
-      relationshipPaths.forEach((path) => gsap.set(path, { strokeDashoffset: Number(path.dataset.pathLength || 0) * (1 - progress) }));
-    },
+  relationshipPaths.forEach((path) => {
+    const length = path.getTotalLength();
+    path.dataset.pathLength = String(length);
+    gsap.set(path, { strokeDasharray: length, strokeDashoffset: length });
   });
+  if (relationship) {
+    ScrollTrigger.create({
+      trigger: relationship,
+      start: "top top+=80",
+      end: "bottom bottom",
+      scrub: 0.35,
+      onUpdate: ({ progress }) => {
+        relationship.style.setProperty("--relationship-progress", String(progress));
+        relationshipPaths.forEach((path) => gsap.set(path, { strokeDashoffset: Number(path.dataset.pathLength || 0) * (1 - progress) }));
+      },
+    });
+  }
 
   const refreshId = requestAnimationFrame(() => ScrollTrigger.refresh());
-  void document.fonts?.ready.then(() => ScrollTrigger.refresh());
+  if (document.fonts) {
+    void document.fonts.ready.then(() => ScrollTrigger.refresh());
+  }
   return () => {
     cancelAnimationFrame(refreshId);
     animations.forEach((animation) => animation.kill());
@@ -226,6 +262,8 @@ export default function CubeIQEnhancements() {
   useEffect(() => {
     const root = document.getElementById("cubeiq-page");
     if (!root) return;
+    root.classList.add(stability.loaded);
+
     const heroSection = root.querySelector<HTMLElement>("#home");
     let heroHost = document.getElementById("cubeiq-hero-v2-root");
     if (heroSection && !heroHost) {
@@ -236,7 +274,9 @@ export default function CubeIQEnhancements() {
       heroSection.appendChild(heroHost);
     }
 
-    const methodSection = Array.from(root.querySelectorAll<HTMLElement>("section")).find((section) => Array.from(section.querySelectorAll("p")).some((p) => p.textContent?.trim() === "How we work"));
+    const methodSection = Array.from(root.querySelectorAll<HTMLElement>("section")).find((section) =>
+      Array.from(section.querySelectorAll("p")).some((p) => p.textContent?.trim() === "How we work"),
+    );
     const methodTrack = methodSection?.querySelector<HTMLElement>("article")?.parentElement ?? null;
     let methodHost = document.getElementById("cubeiq-method-extra");
     if (methodTrack) {
@@ -252,12 +292,15 @@ export default function CubeIQEnhancements() {
     setHosts({ hero: heroHost, method: methodHost });
     const cleanupTabs = installAudienceTabs(root);
     let cleanupMotion = () => undefined;
-    const frame = requestAnimationFrame(() => { cleanupMotion = installMotion(root); });
+    const frame = requestAnimationFrame(() => {
+      cleanupMotion = installMotion(root);
+    });
 
     return () => {
       cancelAnimationFrame(frame);
       cleanupTabs();
       cleanupMotion();
+      root.classList.remove(stability.loaded);
       heroSection?.removeAttribute("data-hero-v2");
       heroHost?.remove();
       methodHost?.remove();
