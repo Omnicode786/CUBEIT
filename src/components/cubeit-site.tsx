@@ -2,7 +2,7 @@
 
 import { Fragment, useEffect, useMemo, useRef, useState, type CSSProperties } from "react";
 import Image from "next/image";
-import { ArrowLeft, ArrowRight, ArrowUpRight, Briefcase, ChevronDown, ChevronUp, Code2, Cpu, FlaskConical, Sparkles } from "lucide-react";
+import { ArrowLeft, ArrowRight, ArrowUpRight, Briefcase, ChevronDown, ChevronUp, Menu, X, Code2, Cpu, FlaskConical, Sparkles } from "lucide-react";
 import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 import Lenis from "lenis";
@@ -514,6 +514,27 @@ function OurWorkDropdown() {
 export function Navbar() {
   const lastScrollY = useRef(0);
   const navRef = useRef<HTMLElement>(null);
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+
+  useEffect(() => {
+    if (!mobileMenuOpen) return;
+    const closeOnEscape = (event: KeyboardEvent) => {
+      if (event.key === "Escape") setMobileMenuOpen(false);
+    };
+    const closeOnOutsidePointer = (event: PointerEvent) => {
+      if (navRef.current && !navRef.current.contains(event.target as Node)) setMobileMenuOpen(false);
+    };
+    const closeOnDesktop = window.matchMedia("(min-width: 921px)");
+    const handleDesktop = () => { if (closeOnDesktop.matches) setMobileMenuOpen(false); };
+    document.addEventListener("keydown", closeOnEscape);
+    document.addEventListener("pointerdown", closeOnOutsidePointer);
+    closeOnDesktop.addEventListener("change", handleDesktop);
+    return () => {
+      document.removeEventListener("keydown", closeOnEscape);
+      document.removeEventListener("pointerdown", closeOnOutsidePointer);
+      closeOnDesktop.removeEventListener("change", handleDesktop);
+    };
+  }, [mobileMenuOpen]);
 
   useEffect(() => {
     const nav = navRef.current;
@@ -536,6 +557,8 @@ export function Navbar() {
       if (y < 50) {
         nav.removeAttribute("data-hidden");
         if (wasHidden) triggerReveal();
+      } else if (nav.dataset.menuOpen === "true") {
+        nav.removeAttribute("data-hidden");
       } else if (y > lastScrollY.current) {
         nav.classList.remove("nav--revealing");
         nav.dataset.hidden = "true";
@@ -556,7 +579,7 @@ export function Navbar() {
   }, []);
 
   return (
-    <header ref={navRef} className="nav-shell">
+    <header ref={navRef} className="nav-shell" data-menu-open={mobileMenuOpen}>
       <a className="nav-logo" href="/" aria-label="CubeIT home"><LogoMark /></a>
       <nav className="nav-links" aria-label="Main navigation">
         <a href="/">Home</a>
@@ -568,7 +591,25 @@ export function Navbar() {
       <div className="nav-actions">
         <CubeThemeToggle />
         <a className="nav-cta" href="/contact">Start a project <ArrowUpRight /></a>
+        <button
+          type="button"
+          className="nav-mobile-toggle"
+          aria-label={mobileMenuOpen ? "Close navigation menu" : "Open navigation menu"}
+          aria-controls="cubeit-mobile-navigation"
+          aria-expanded={mobileMenuOpen}
+          onClick={() => setMobileMenuOpen((open) => !open)}
+        >
+          {mobileMenuOpen ? <X aria-hidden="true" /> : <Menu aria-hidden="true" />}
+        </button>
       </div>
+      <nav id="cubeit-mobile-navigation" className="nav-mobile-panel" aria-label="Mobile navigation" inert={!mobileMenuOpen}>
+        <a href="/" onClick={() => setMobileMenuOpen(false)}>Home <ArrowUpRight aria-hidden="true" /></a>
+        <a href="/services" onClick={() => setMobileMenuOpen(false)}>Services <ArrowUpRight aria-hidden="true" /></a>
+        <a href="/our-work" onClick={() => setMobileMenuOpen(false)}>Our Work <ArrowUpRight aria-hidden="true" /></a>
+        <a href="/team" onClick={() => setMobileMenuOpen(false)}>Team <ArrowUpRight aria-hidden="true" /></a>
+        <a href="/cubeiq" onClick={() => setMobileMenuOpen(false)}>CubeIQ <ArrowUpRight aria-hidden="true" /></a>
+        <a className="nav-mobile-contact" href="/contact" onClick={() => setMobileMenuOpen(false)}>Start a project <ArrowUpRight aria-hidden="true" /></a>
+      </nav>
     </header>
   );
 }

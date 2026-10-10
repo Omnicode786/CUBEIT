@@ -5114,3 +5114,123 @@ h4 {
       0 0 0 1px rgba(30,99,244,.32) !important;
   }
 }
+
+
+/* Issue #14: compact navigation only. Desktop presentation stays unchanged. */
+.nav-mobile-toggle,
+.nav-mobile-panel { display: none; }
+
+@media (max-width: 920px) {
+  .nav-shell {
+    width: calc(100% - 32px);
+    max-width: 680px;
+    top: 14px;
+    height: 64px;
+    padding: 0 14px;
+    grid-template-columns: minmax(0, 1fr) auto;
+    border-radius: 24px;
+  }
+  .nav-shell[data-scrolled] { height: 60px !important; }
+  .nav-logo { min-width: 0; }
+  .nav-links { display: none; }
+  .nav-actions { gap: 8px; }
+  .nav-shell .nav-cta { display: none; }
+  .nav-mobile-toggle {
+    display: grid;
+    place-items: center;
+    width: 44px;
+    height: 44px;
+    border: 1px solid rgba(8, 29, 73, 0.10);
+    border-radius: 14px;
+    background: #f1f5fd;
+    color: #081d49;
+    cursor: pointer;
+    touch-action: manipulation;
+    transition: background 180ms ease, color 180ms ease;
+  }
+  .nav-mobile-toggle svg { width: 21px; height: 21px; stroke-width: 2; }
+  .nav-mobile-toggle:focus-visible,
+  .nav-mobile-panel a:focus-visible { outline: 3px solid #6b9eff; outline-offset: 3px; }
+  .nav-mobile-toggle[aria-expanded="true"] { background: #1e63f4; color: #fff; }
+  .dark .nav-mobile-toggle { background: #16243a; border-color: rgba(255,255,255,.13); color: #eaf1ff; }
+  .dark .nav-mobile-toggle[aria-expanded="true"] { background: #1e63f4; color: #fff; }
+  .nav-mobile-panel {
+    display: flex;
+    flex-direction: column;
+    position: absolute;
+    top: calc(100% + 10px);
+    right: 0;
+    left: 0;
+    max-height: min(70dvh, 540px);
+    overflow-y: auto;
+    overscroll-behavior: contain;
+    padding: 10px;
+    border: 1px solid rgba(8,29,73,.09);
+    border-radius: 22px;
+    background: #fff;
+    box-shadow: 0 24px 56px rgba(8,29,73,.17), 0 5px 15px rgba(8,29,73,.06);
+    opacity: 0;
+    visibility: hidden;
+    pointer-events: none;
+    transform: translateY(-8px) scale(.985);
+    transform-origin: top center;
+    transition: opacity .2s ease, transform .2s ease, visibility .2s;
+  }
+  .nav-shell[data-menu-open="true"] .nav-mobile-panel {
+    opacity: 1;
+    visibility: visible;
+    pointer-events: auto;
+    transform: translateY(0) scale(1);
+  }
+  .nav-shell[data-menu-open="true"] { border-radius: 24px; }
+  .nav-mobile-panel a {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+    min-height: 49px;
+    padding: 11px 16px;
+    border-radius: 13px;
+    color: #15284b;
+    font-size: 15px;
+    font-weight: 650;
+    line-height: 1.25;
+    letter-spacing: -.015em;
+    text-decoration: none;
+    transition: background .2s ease, color .2s ease;
+  }
+  .nav-mobile-panel a:hover,
+  .nav-mobile-panel a:focus-visible { background: #eff5ff; color: #1e63f4; }
+  .nav-mobile-panel a svg { width: 17px; height: 17px; flex: none; opacity: .5; }
+  .nav-mobile-panel .nav-mobile-contact {
+    margin-top: 8px;
+    padding-inline: 16px;
+    min-height: 50px;
+    color: #fff;
+    background: linear-gradient(120deg, #1e63f4, #081d49);
+  }
+  .nav-mobile-panel .nav-mobile-contact:hover,
+  .nav-mobile-panel .nav-mobile-contact:focus-visible { background: #164cc0; color: #fff; }
+  .dark .nav-mobile-panel {
+    background: #09111e;
+    border-color: rgba(255,255,255,.1);
+    box-shadow: 0 24px 60px rgba(0,0,0,.4);
+  }
+  .dark .nav-mobile-panel a { color: #ebf0fa; }
+  .dark .nav-mobile-panel a:hover,
+  .dark .nav-mobile-panel a:focus-visible { color: #fff; background: #192b48; }
+  .dark .nav-mobile-panel .nav-mobile-contact { color: #fff; background: linear-gradient(120deg, #1e63f4, #12316d); }
+  .dark .nav-mobile-panel .nav-mobile-contact:hover { background: #1a4ba4; }
+}
+
+@media (max-width: 380px) {
+  .nav-shell { width: calc(100% - 20px); padding-inline: 10px; }
+  .nav-actions { gap: 5px; }
+  .nav-shell .theme-toggle-star { width: 40px; height: 40px; }
+  .nav-mobile-toggle { width: 42px; height: 42px; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .nav-mobile-panel,
+  .nav-mobile-toggle { transition: none; }
+}
