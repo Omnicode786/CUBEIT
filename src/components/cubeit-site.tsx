@@ -1441,17 +1441,8 @@ function ScrollToTop() {
 
 export default function CubeITSite() {
   useMotion();
-  const schema = useMemo(() => ({
-    "@context": "https://schema.org",
-    "@type": "Organization",
-    name: "CubeIT",
-    alternateName: "Qubit",
-    description: "CubeIT builds AI products, enterprise software, intelligent automation, and scalable digital platforms for modern businesses.",
-  }), []);
-
   return (
     <>
-      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(schema) }} />
       <CursorFill />
       <Backgrounds />
       <Navbar />

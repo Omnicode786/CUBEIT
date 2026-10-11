@@ -1,9 +1,12 @@
 import type { Metadata } from "next";
 import ServicesPage from "@/components/services/ServicesPage";
 
+// Backwards-compatible internal route. /services is the public canonical URL.
 export const metadata: Metadata = {
-  title: "Services | CubeIT",
-  description: "CubeIT services across AI products, industry platforms, product engineering, automation, and scalable software systems.",
+  title: "AI Products, Custom Software & SaaS Services",
+  description: "CubeIT builds AI products, business platforms and software tools.",
+  alternates: { canonical: "/services" },
+  robots: { index: false, follow: true },
 };
 
 export default function Page() {

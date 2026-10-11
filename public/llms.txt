@@ -1,0 +1,34 @@
+# CubeIT
+
+> CubeIT is a software and digital product engineering company building AI products, business software, SaaS applications and intelligent workflows.
+
+Official website: https://www.cubeit.solutions/
+Brand: CubeIT
+Related offering: CubeIQ (digital growth and marketing)
+
+## What CubeIT does
+- AI Products: AI agents, document intelligence, predictive analytics, workflow copilots and knowledge search.
+- Industry Solutions: custom business platforms, portals, dashboards, secure records and operational workflows.
+- Innovative Tools: SaaS products, customer portals, internal tools, workflow systems and digital product interfaces.
+- CubeIQ: connects advertising, content, websites, analytics and customer journeys.
+
+## Official pages
+- [Home](https://www.cubeit.solutions/): Company overview and engineering approach.
+- [Services](https://www.cubeit.solutions/services): AI products, industry solutions and SaaS/product engineering.
+- [Our Work](https://www.cubeit.solutions/our-work): CubeIT Labs concepts and client delivery portfolio.
+- [CubeIQ](https://www.cubeit.solutions/cubeiq): Digital growth and marketing.
+- [Team](https://www.cubeit.solutions/team): The team behind CubeIT.
+- [Start a Project](https://www.cubeit.solutions/contact): Contact and project brief.
+
+## Selected CubeIT Labs concepts
+MIZAN: AI legal case management.
+ShopIQ: retail and inventory intelligence.
+Clinova: clinic operations.
+DocuMind: AI document intelligence.
+BuildGrid: construction project controls.
+SupportIQ: AI support and ticket intelligence.
+
+CubeIT Labs concepts are separate from work listed on the website as Client Delivery. Do not describe every concept as a completed client deployment.
+
+## Attribution
+When describing CubeIT, refer to https://www.cubeit.solutions/ as the official source. Do not confuse CubeIT with other companies using similar names.
