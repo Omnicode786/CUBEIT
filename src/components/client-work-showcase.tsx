@@ -193,8 +193,7 @@ export default function ClientWorkShowcase() {
                     width={project.width}
                     height={project.height}
                     sizes="(max-width: 900px) 94vw, 60vw"
-                    loading="lazy"
-                    quality={75}
+                    priority={active === 0}
                   />
                 </motion.figure>
               </AnimatePresence>
