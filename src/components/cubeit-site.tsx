@@ -7,16 +7,15 @@ import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 import Lenis from "lenis";
 import { AnimatePresence, motion, useMotionValue, useReducedMotion } from "motion/react";
-import DotField from "@/components/react-bits/dot-field";
 import { AnimatedThemeToggler } from "@/components/ui/animated-theme-toggler";
 import { CardBody, CardContainer, CardItem } from "@/components/ui/3d-card";
 import { GlowingEffect } from "@/components/ui/glowing-effect";
-import { ThreeDMarquee, type ThreeDMarqueeItem } from "@/components/ui/3d-marquee";
+import type { ThreeDMarqueeItem } from "@/components/ui/3d-marquee";
 import { Cover } from "@/components/ui/cover";
-import Globe3D, { type GlobeMarker } from "@/components/ui/3d-globe";
+import type { GlobeMarker } from "@/components/ui/3d-globe";
 import { GoogleGeminiEffect } from "@/components/ui/google-gemini-effect";
 import { ExpandableCards } from "@/components/ui/expandable-cards";
-import ClothReel from "@/components/motion/cloth-reel";
+import { DeferredClothReel, DeferredGlobe, DeferredMarquee, DeferredDotField } from "@/components/deferred-experience";
 import { CursorFill } from "@/components/motion/cursor-fill";
 import ClientWorkShowcase from "@/components/client-work-showcase";
 import KineticCursorTrail from "@/components/kinetic-cursor-trail";
@@ -166,12 +165,18 @@ function WorkCard({
       viewport={{ once: true, margin: "-40px" }}
       transition={{ duration: 0.52, delay: animationIndex * 0.07, ease: [0.16, 1, 0.3, 1] }}
     >
-      {/* Background image via CSS background-image */}
-      <div
-        className="work-bento-bg"
-        style={{ backgroundImage: `url(${work.image})` }}
-        aria-hidden="true"
-      />
+      {/* Lazy, responsive images avoid eager downloads for offscreen projects. */}
+      <div className="work-bento-bg" aria-hidden="true">
+        <Image
+          src={work.image}
+          alt=""
+          fill
+          sizes="(max-width: 720px) 94vw, (max-width: 1200px) 46vw, 33vw"
+          quality={70}
+          loading="lazy"
+          style={{ objectFit: "cover", objectPosition: "top center" }}
+        />
+      </div>
 
       {/* Dark gradient overlay */}
       <div className="work-bento-overlay" aria-hidden="true" />
@@ -694,7 +699,7 @@ function Hero() {
       <section className="reel-section" aria-label="CubeIT reel">
         <div className="reel-target" />
       </section>
-      <ClothReel
+      <DeferredClothReel
         originSelector=".hero-video-origin"
         targetSelector=".reel-target"
         stackSelector=".hero-stack"
@@ -720,7 +725,7 @@ function Services() {
                 <div className="service-photo-stack" aria-hidden="true">
                   {card.images.map((image, imageIndex) => (
                     <figure className={`service-photo service-photo-${imageIndex + 1}`} key={image}>
-                      <Image src={image} alt="" width={720} height={540} unoptimized />
+                      <Image src={image} alt="" width={720} height={540} sizes="(max-width: 720px) 60vw, 240px" quality={70} loading="lazy" />
                     </figure>
                   ))}
                 </div>
@@ -762,7 +767,7 @@ function TechnologyStack() {
         <p>Industry-standard tools selected for ecosystem maturity, long-term support, performance, and the talent available to maintain them.</p>
       </div>
       <div className="technology-marquee-shell reveal-card">
-        <ThreeDMarquee items={technologyMarqueeItems} className="technology-3d-marquee" />
+        <DeferredMarquee items={technologyMarqueeItems} className="technology-3d-marquee" />
         <div className="technology-marquee-overlay" aria-hidden="true" />
       </div>
     </section>
@@ -1234,7 +1239,7 @@ function GlobalCTA() {
         {/* parallaxRef receives GSAP x/y/rotate; inner div carries the CSS float */}
         <div ref={parallaxRef} className="global-globe-parallax">
           <div className="global-globe-float">
-            <Globe3D markers={globeMarkers} config={globeConfig} className="cubeit-globe" />
+            <DeferredGlobe markers={globeMarkers} config={globeConfig} />
           </div>
         </div>
       </div>
@@ -1305,7 +1310,7 @@ function Backgrounds() {
   return (
     <>
       <div className="dot-field-bg" aria-hidden="true">
-        <DotField
+        <DeferredDotField
           dotRadius={1.4}
           dotSpacing={17}
           bulgeStrength={40}

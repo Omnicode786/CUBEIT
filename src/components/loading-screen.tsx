@@ -31,7 +31,7 @@ const MESSAGES = [
   "Launching Innovation",
 ];
 
-const MIN_DISPLAY_MS = 1500;
+const MIN_DISPLAY_MS = 550;
 const MSG_INTERVAL_MS = 1300;
 
 /* Shared easings */
@@ -50,6 +50,8 @@ export default function LoadingScreen() {
     )[0] as PerformanceNavigationTiming | undefined;
 
     if (nav?.type !== "navigate" && nav?.type !== "reload") return;
+    // Never obscure already-visible mobile content during hydration.
+    if (window.matchMedia("(max-width: 900px), (prefers-reduced-motion: reduce)").matches) return;
 
     queueMicrotask(() => setVisible(true));
     const startTime = performance.now();
