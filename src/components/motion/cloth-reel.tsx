@@ -108,7 +108,7 @@ export default function ClothReel({ originSelector, targetSelector, stackSelecto
     if (!canvas || !video || !fallback || !origin || !target || !stack) return;
 
     const reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-    const coarse = window.matchMedia("(pointer: coarse), (max-width: 900px)").matches;
+    const coarse = window.matchMedia("(pointer: coarse)").matches;
     let destroyed = false;
     let frame = 0;
     let loopCallback: FrameRequestCallback | null = null;
@@ -117,7 +117,6 @@ export default function ClothReel({ originSelector, targetSelector, stackSelecto
     let material: THREE.ShaderMaterial | null = null;
     let texture: THREE.VideoTexture | null = null;
     let stackNearViewport = true;
-    let onScrollFallback: (() => void) | null = null;
 
     const startLoop = () => {
       if (!destroyed && stackNearViewport && loopCallback && !frame) {
@@ -169,32 +168,19 @@ export default function ClothReel({ originSelector, targetSelector, stackSelecto
       fallback.style.height = `${view.height}px`;
       fallback.style.borderRadius = `${mix(18, 26, view.sizeProgress)}px`;
       fallback.style.opacity = stackRect.bottom > 0 && stackRect.top < window.innerHeight ? "1" : "0";
-      // Settle and stop instead of running a permanent 60fps layout loop on touch.
-      if (Math.abs(desired - fallbackCurrent) > 0.002) {
-        frame = requestAnimationFrame(fallbackFrame);
-      }
+      frame = requestAnimationFrame(fallbackFrame);
     };
 
     if (reduce || coarse) {
       fallback.dataset.active = "true";
       loopCallback = fallbackFrame;
-      // Scroll-driven updates keep the reveal responsive without idle CPU churn.
-      onScrollFallback = () => startLoop();
-      window.addEventListener("scroll", onScrollFallback, { passive: true });
-      window.addEventListener("resize", onScrollFallback, { passive: true });
       startLoop();
       return () => {
         destroyed = true;
         stopLoop();
         visibilityObserver.disconnect();
-        window.removeEventListener("scroll", onScrollFallback!);
-        window.removeEventListener("resize", onScrollFallback!);
       };
     }
-
-    // Only desktop WebGL needs the remote video bytes; mobile uses its poster.
-    video.src = src;
-    video.load();
 
     try {
       renderer = new THREE.WebGLRenderer({ canvas, alpha: true, premultipliedAlpha: false, antialias: true, powerPreference: "high-performance" });
@@ -328,8 +314,10 @@ export default function ClothReel({ originSelector, targetSelector, stackSelecto
   return (
     <div className="cloth-reel" aria-hidden="true">
       <canvas ref={canvasRef} className="cloth-reel__canvas" />
-      <div ref={fallbackRef} className="cloth-reel__fallback" style={{ backgroundImage: `url(${poster})`, backgroundPosition: "center", backgroundSize: "cover" }}>
-        <video ref={videoRef} muted loop playsInline preload="none" crossOrigin="anonymous" poster={poster} suppressHydrationWarning />
+      <div ref={fallbackRef} className="cloth-reel__fallback">
+        <video ref={videoRef} muted loop autoPlay playsInline preload="auto" crossOrigin="anonymous" poster={poster} suppressHydrationWarning>
+          <source src={src} type="video/mp4" />
+        </video>
       </div>
       <div className="cloth-reel__label">CubeIT / systems in motion</div>
     </div>
