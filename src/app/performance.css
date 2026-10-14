@@ -21,3 +21,10 @@
 @media (max-width: 900px) {
   .dot-field-bg { display: none; }
 }
+
+/* Mobile content is rendered immediately; avoid unnecessary compositor layers. */
+@media (max-width: 900px), (pointer: coarse) {
+  .reveal-up, .reveal-card, .reveal-title, .hero-title > * {
+    will-change: auto;
+  }
+}

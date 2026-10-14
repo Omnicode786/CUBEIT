@@ -1026,7 +1026,7 @@ function GeminiStory() {
     const el = sectionRef.current;
     if (!el) return;
 
-    const reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    const reduce = window.matchMedia("(prefers-reduced-motion: reduce), (max-width: 900px)").matches;
     if (reduce) {
       pathLength1.set(1); pathLength2.set(1); pathLength3.set(1);
       pathLength4.set(1); pathLength5.set(1);
@@ -1327,6 +1327,11 @@ function Backgrounds() {
 
 function useMotion() {
   useEffect(() => {
+    // Native scrolling and static reveal content are substantially cheaper on
+    // touch/small screens than dozens of GSAP measurements + a Lenis RAF loop.
+    if (window.matchMedia("(max-width: 900px), (pointer: coarse), (prefers-reduced-motion: reduce)").matches) {
+      return;
+    }
     gsap.registerPlugin(ScrollTrigger);
     const lenis = new Lenis({ lerp: 0.08, wheelMultiplier: 0.9, smoothWheel: true });
     const ticker = (time: number) => lenis.raf(time * 1000);
