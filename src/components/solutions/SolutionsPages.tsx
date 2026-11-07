@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { ArrowDownRight, ArrowUpRight, ChevronRight, MoveUpRight } from "lucide-react";
+import { ArrowDownRight, ArrowUpRight, ChevronRight } from "lucide-react";
 import { Footer, Navbar } from "@/components/cubeit-site";
 import { Solution, solutions } from "@/lib/solutions";
 import { SolutionReveal } from "./solution-reveal";
@@ -12,14 +12,6 @@ function Action({ href, children, secondary = false }: { href: string; children:
 }
 function GridBackdrop() {return <div data-motion-depth className={styles.gridBackdrop} aria-hidden="true"><div className={styles.orbOne}/><div className={styles.orbTwo}/></div>;}
 const digits = (index: number) => String(index + 1).padStart(2, "0");
-function SolutionCard({item,index}:{item: Solution; index:number}) {
- return <Link data-motion-item href={`/solutions/${item.slug}`} className={styles.solutionCard} data-accent={item.accent}>
-   <div className={styles.cardHeader}><span>{digits(index)} / 04</span><MoveUpRight aria-hidden="true" size={22}/></div>
-   <div className={styles.cardArt} aria-hidden="true"><ArtifactScene kind={item.slug} compact /></div>
-   <span className={styles.cardKicker}>{item.eyebrow}</span><h3>{item.shortTitle}</h3><p>{item.description}</p>
-   <span className={styles.cardFooter}>Explore capability <ArrowUpRight aria-hidden="true" size={18}/></span>
- </Link>;
-}
 function ConnectStrip() {
  return <section data-motion-feature className={styles.contactStrip}><div><Kicker>THE NEXT STEP</Kicker><h2>Tell us the problem.<br/><em>We’ll shape the system.</em></h2><p>Bring your brief, your ideas, or just the problem you want solved. We’ll work out the right first conversation.</p></div><Action href="/contact">Start a project</Action></section>;
 }
@@ -31,10 +23,7 @@ export function SolutionsHub() {
    <p>Websites, online stores, custom software and applied AI. CubeIT creates thoughtful digital experiences for businesses in Pakistan and beyond—designed to be useful, distinctive and built to grow.</p>
    <div className={styles.heroActions}><Action href="#explore">Explore solutions</Action><Action href="/contact" secondary>Talk to CubeIT</Action></div>
   </div><div data-motion-index className={styles.heroIndex} aria-hidden="true">01 / DISCOVER <ArrowDownRight size={19}/></div></section>
-  <section id="explore" data-motion-section className={styles.contentSection}><div className={styles.sectionHeading}><div><Kicker>WHAT CAN WE BUILD?</Kicker><h2>Different challenges.<br/><span>One engineering mindset.</span></h2></div><p>Choose the problem that looks most like yours. Each capability has its own approach, requirements and decisions worth getting right.</p></div>
-   <div data-motion-group className={styles.cardsGrid}>{solutions.map((item,index)=><SolutionCard key={item.slug} item={item} index={index}/>)}</div>
-  </section>
-  <StoryRail/>
+  <div id="explore"><StoryRail/></div>
   <section data-motion-feature className={styles.editorialBand}><div className={styles.bandLine}><span>THINK CLEARLY</span><span>DESIGN INTENTIONALLY</span><span>ENGINEER FOR REAL USE</span></div><h2>Not a template to fit your business.<br/><span>A system shaped around it.</span></h2><p>We connect product thinking, interaction design, engineering and ongoing improvement. Whether you need your first business website or a complex internal platform, we begin with what people actually need to do.</p><Action href="/our-work" secondary>Explore our work</Action></section>
   <section data-motion-section className={styles.contentSection}><div className={styles.sectionHeading}><div><Kicker>HOW WE WORK</Kicker><h2>A clear path<br/><span>from idea to launch.</span></h2></div></div><div data-motion-group className={styles.methodGrid}>{[{title:"Discover",body:"Identify users, business objectives, constraints and the problem worth solving."},{title:"Design",body:"Shape the structure, content and interactions before complexity creeps in."},{title:"Build",body:"Engineer the experience with testing, useful feedback and sensible milestones."},{title:"Improve",body:"Launch, measure and refine the product as real needs become clearer."}].map((item,index)=><article data-motion-item key={item.title}><span>{digits(index)}</span><h3>{item.title}</h3><p>{item.body}</p></article>)}</div></section>
   <ConnectStrip/>
