@@ -43,7 +43,7 @@ export function SolutionReveal() {
             const heading = hero.querySelector("h1");
             const lead = hero.querySelector("p");
             const actions = hero.querySelectorAll("[data-motion-action]");
-            const scene = hero.querySelector<HTMLElement>("[data-motion-art] .artifact");
+            const scene = hero.querySelector<HTMLElement>("[data-motion-art] [data-artifact-root]");
             const grid = hero.querySelector<HTMLElement>("[data-motion-depth]");
             const tl = gsap.timeline({ defaults: { ease: "expo.out" }, delay: 0.12 });
             if (breadcrumb) tl.fromTo(breadcrumb,{ y: 15, opacity: 0 },{ y: 0, opacity: 1, duration: 0.65 });
@@ -68,14 +68,12 @@ export function SolutionReveal() {
           // 02 — SERVICE OBJECTS: each artifact communicates a different
           // interaction model: an art-directed website, a store, a dashboard
           // with growing metrics, and an AI pathway that draws itself.
-          all<HTMLElement>(".artifact").forEach((artifact) => {
+          all<HTMLElement>("[data-artifact-root]").forEach((artifact) => {
             const inRail = artifact.closest("[data-story-rail]") !== null;
             const inHero = artifact.closest("[data-motion-hero]") !== null;
             const trigger = inRail ? artifact.closest("[data-rail-panel]") : artifact;
             if (!trigger) return;
 
-            const browser = artifact.querySelector(".missing-browser-selector");
-            void browser; // Kept selectors local; product artwork is CSS-module scoped.
             const path = artifact.querySelector<SVGPathElement>("[data-artifact-path]");
             if (path) {
               const len = path.getTotalLength();
@@ -188,7 +186,7 @@ export function SolutionReveal() {
           // 06 — SCENE POINTER DEPTH. A subtle desktop-only response
           // applied to the interface object, not the layout's text/links.
           if (hover && wide) {
-            const art=scope<HTMLElement>("[data-motion-hero] [data-motion-art] .artifact");
+            const art=scope<HTMLElement>("[data-motion-hero] [data-motion-art] [data-artifact-root]");
             const container=art?.parentElement;
             if(art && container){
               const qx=gsap.quickTo(art,"rotationX",{duration:.8,ease:"power3.out"});
