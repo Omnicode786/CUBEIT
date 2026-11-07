@@ -584,6 +584,7 @@ export function Navbar() {
       <nav className="nav-links" aria-label="Main navigation">
         <a href="/">Home</a>
         <a href="/services">Services</a>
+        <a href="/solutions">Solutions</a>
         <a href="/our-work">Our Work</a>
         <a href="/team">Team</a>
         <a href="/cubeiq">CubeIQ</a>
@@ -605,6 +606,7 @@ export function Navbar() {
       <nav id="cubeit-mobile-navigation" className="nav-mobile-panel" aria-label="Mobile navigation" inert={!mobileMenuOpen}>
         <a href="/" onClick={() => setMobileMenuOpen(false)}>Home <ArrowUpRight aria-hidden="true" /></a>
         <a href="/services" onClick={() => setMobileMenuOpen(false)}>Services <ArrowUpRight aria-hidden="true" /></a>
+        <a href="/solutions" onClick={() => setMobileMenuOpen(false)}>Solutions <ArrowUpRight aria-hidden="true" /></a>
         <a href="/our-work" onClick={() => setMobileMenuOpen(false)}>Our Work <ArrowUpRight aria-hidden="true" /></a>
         <a href="/team" onClick={() => setMobileMenuOpen(false)}>Team <ArrowUpRight aria-hidden="true" /></a>
         <a href="/cubeiq" onClick={() => setMobileMenuOpen(false)}>CubeIQ <ArrowUpRight aria-hidden="true" /></a>
@@ -1281,6 +1283,7 @@ export function Footer() {
             <h3>Company</h3>
             <a href="/">Home</a>
             <a href="/services">Services</a>
+            <a href="/solutions">Website, Software & AI Solutions</a>
             <a href="/our-work">Things We Build</a>
             <a href="/team">Team</a>
             <a href="/contact">Contact</a>
