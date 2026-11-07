@@ -2,7 +2,7 @@
 import { useEffect } from "react";
 export function SolutionReveal() {
  useEffect(() => {
-  const root = document.querySelector("[data-cubeit-solution]");
+  const root = document.querySelector("main#main-content");
   if (!root || !("IntersectionObserver" in window)) return;
   const elements = root.querySelectorAll("[data-solution-reveal]");
   if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
