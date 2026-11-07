@@ -374,3 +374,18 @@ details[open] .faqPlus{transform:rotate(45deg)}
  .storyRailTrack{transform:none!important}
  .journeyStep{opacity:1;transform:none}
 }
+
+/* The gallery is exactly one viewport tall while pinned, including on
+   13-inch laptops. Keep the panel and progress comfortably in frame. */
+@media (min-width:901px){
+ .storyRailViewport{height:100svh;min-height:700px;padding:clamp(20px,3.4vh,46px) 0 24px}
+ .railTopline{padding-bottom:clamp(12px,2.2vh,24px)}
+ .storyRailHeading{padding-bottom:clamp(12px,2.1vh,26px)}
+ .storyRailHeading h2{font-size:clamp(2.6rem,3.8vw,5rem);margin-top:10px}
+ .storyRailPanel{min-height:clamp(320px,46svh,420px);padding:clamp(21px,2.2vw,36px);
+    transition:border-color .55s,box-shadow .55s,opacity .55s,background-color .55s}
+ .railPanelArt{height:clamp(270px,38svh,350px)}
+ .railProgress{margin-top:clamp(12px,2.1vh,25px)}
+ .storyRailPanel[data-active="true"]{border-color:rgba(173,213,255,.52);box-shadow:0 36px 90px rgba(0,0,0,.32)}
+ .storyRailPanel[data-active="false"]{opacity:.82}
+}
