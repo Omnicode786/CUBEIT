@@ -15,6 +15,11 @@ Related offering: CubeIQ (digital growth and marketing)
 ## Official pages
 - [Home](https://www.cubeit.solutions/): Company overview and engineering approach.
 - [Services](https://www.cubeit.solutions/services): AI products, industry solutions and SaaS/product engineering.
+- [Solutions](https://www.cubeit.solutions/solutions): Business websites, ecommerce, custom software, SaaS, and AI automation in Pakistan.
+- [Business website development in Pakistan](https://www.cubeit.solutions/solutions/website-development-pakistan): Website design, development, launch, technical SEO and maintenance planning.
+- [Ecommerce development in Pakistan](https://www.cubeit.solutions/solutions/ecommerce-development-pakistan): Online storefronts, product discovery, checkout and business integrations.
+- [Custom software development in Pakistan](https://www.cubeit.solutions/solutions/custom-software-development-pakistan): SaaS, business applications, portals, dashboards, and custom workflows.
+- [AI automation development in Pakistan](https://www.cubeit.solutions/solutions/ai-automation-development-pakistan): Applied AI agents, document intelligence, workflow automation and evaluation.
 - [Our Work](https://www.cubeit.solutions/our-work): CubeIT Labs concepts and client delivery portfolio.
 - [CubeIQ](https://www.cubeit.solutions/cubeiq): Digital growth and marketing.
 - [Team](https://www.cubeit.solutions/team): The team behind CubeIT.
