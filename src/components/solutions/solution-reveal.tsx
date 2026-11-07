@@ -95,6 +95,7 @@ export function SolutionReveal() {
           const viewport = rail?.querySelector<HTMLElement>("[data-rail-viewport]");
           const track = rail?.querySelector<HTMLElement>("[data-rail-track]");
           const progress = rail?.querySelector<HTMLElement>("[data-rail-progress]");
+          const panels = rail ? Array.from(rail.querySelectorAll<HTMLElement>("[data-rail-panel]")) : [];
           if (rail && viewport && track && wide) {
             const getDistance = () => Math.max(0, track.scrollWidth - viewport.clientWidth);
             if (getDistance() > 20) {
@@ -107,10 +108,17 @@ export function SolutionReveal() {
                   end:()=>"+="+Math.max(1,getDistance()),
                   pin:true,pinSpacing:true,anticipatePin:1,
                   scrub:1.05,invalidateOnRefresh:true,
-                  onUpdate:(self)=>{if(progress)gsap.set(progress,{scaleX:self.progress});},
+                  onUpdate:(self)=>{
+                    if(progress)gsap.set(progress,{scaleX:self.progress});
+                    const selected=Math.min(panels.length-1,Math.round(self.progress*(panels.length-1)));
+                    panels.forEach((panel,index)=>{
+                      const active=index===selected?"true":"false";
+                      if(panel.dataset.active!==active)panel.dataset.active=active;
+                    });
+                  },
                 },
               });
-              localCleanups.push(()=>{tween.kill();rail.removeAttribute("data-rail-ready");});
+              localCleanups.push(()=>{tween.kill();rail.removeAttribute("data-rail-ready");panels.forEach(panel=>panel.removeAttribute("data-active"));});
             }
           }
 
