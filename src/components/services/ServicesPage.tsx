@@ -150,6 +150,7 @@ export default function ServicesPage() {
             </p>
             <div className="section-actions">
               <a className="btn btn-primary" href="/contact">Start a project <ArrowUpRight aria-hidden="true" /></a>
+              <a className="btn btn-secondary" href="/solutions">Explore focused solutions <ArrowUpRight aria-hidden="true" /></a>
               <a className="btn btn-secondary" href="#service-story">Explore services</a>
             </div>
           </div>
