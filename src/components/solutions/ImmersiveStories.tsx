@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { ArrowUpRight, ArrowRight, MoveUpRight, ShoppingBag, Code2, Workflow, Globe2 } from "lucide-react";
+import { ArrowUpRight, ArrowRight, MoveUpRight, ShoppingBag, Workflow, Globe2 } from "lucide-react";
 import { solutions, type Solution } from "@/lib/solutions";
 import styles from "./solutions.module.css";
 
@@ -12,7 +12,7 @@ export function ArtifactScene({ kind, compact = false }: { kind: Solution["slug"
     kind.includes("custom-software") ? "software" :
     kind.includes("ai-automation") ? "ai" : "website";
   return (
-    <div className={styles.artifact} data-artifact={type} data-compact={compact ? "true" : undefined}>
+    <div data-artifact-root className={styles.artifact} data-artifact={type} data-compact={compact ? "true" : undefined}>
       <div className={styles.artifactAmbient} aria-hidden="true" />
       {type === "website" && <div className={styles.artifactWindow}>
         <div className={styles.artifactBrowser}><span/><span/><span/><div>cubeit.solutions / experience</div><Globe2 size={13}/></div>
@@ -37,7 +37,7 @@ export function ArtifactScene({ kind, compact = false }: { kind: Solution["slug"
         <div className={styles.softwareBody}>
           <div className={styles.softwareTop}><div><small>PLATFORM / OVERVIEW</small><b>Operations, in sync.</b></div><span>● LIVE SYSTEM</span></div>
           <div className={styles.softwareStats}><div><span>Projects in motion</span><strong>24</strong><small>↑ Across your workspace</small></div><div><span>Tasks completed</span><strong>89%</strong><small>↑ Connected delivery</small></div></div>
-          <div className={styles.softwareChart}><div className={styles.chartTitle}><b>Activity / this month</b><span>LIVE ANALYTICS</span></div><div className={styles.chartBars}>{[42,68,53,79,62,95,73,100,86,96,80,93].map((h,i)=><span key={i} style={{height:`${h}%`}}/>)}</div></div>
+          <div className={styles.softwareChart}><div className={styles.chartTitle}><b>Activity / this month</b><span>LIVE ANALYTICS</span></div><div className={styles.chartBars}>{[42,68,53,79,62,95,73,100,86,96,80,93].map((h,i)=><span data-chart-bar key={i} style={{height:`${h}%`}}/>)}</div></div>
           <div className={styles.softwareBottom}><div><span className={styles.systemPulse}/> All systems connected</div><span>Updated just now</span></div>
         </div>
       </div>}
