@@ -1,3 +1,4 @@
+import { solutions } from "@/lib/solutions";
 import type { MetadataRoute } from "next";
 import { workProjects } from "@/components/works/work-data";
 
@@ -7,6 +8,7 @@ export default function sitemap(): MetadataRoute.Sitemap {
   const pages: Array<{ path: string; priority: number; changeFrequency: "weekly" | "monthly" }> = [
     { path: "/", priority: 1, changeFrequency: "weekly" },
     { path: "/services", priority: 0.9, changeFrequency: "monthly" },
+    { path: "/solutions", priority: 0.9, changeFrequency: "monthly" },
     { path: "/our-work", priority: 0.9, changeFrequency: "monthly" },
     { path: "/cubeiq", priority: 0.8, changeFrequency: "monthly" },
     { path: "/team", priority: 0.6, changeFrequency: "monthly" },
@@ -18,6 +20,11 @@ export default function sitemap(): MetadataRoute.Sitemap {
       url: `${siteUrl}${path}`,
       changeFrequency,
       priority,
+    })),
+    ...solutions.map((solution) => ({
+      url: `${siteUrl}/solutions/${solution.slug}`,
+      changeFrequency: "monthly" as const,
+      priority: 0.85,
     })),
     ...workProjects.map((project) => ({
       url: `${siteUrl}/our-work/${encodeURIComponent(project.slug)}`,
