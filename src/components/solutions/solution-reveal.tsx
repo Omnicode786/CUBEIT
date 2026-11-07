@@ -97,9 +97,11 @@ export function SolutionReveal() {
           const progress = rail?.querySelector<HTMLElement>("[data-rail-progress]");
           const panels = rail ? Array.from(rail.querySelectorAll<HTMLElement>("[data-rail-panel]")) : [];
           if (rail && viewport && track && wide) {
+            // Enable the cinematic layout before measuring; the default is a
+            // fully readable vertical grid for reduced-motion and no-JS users.
+            rail.dataset.railReady = "true";
             const getDistance = () => Math.max(0, track.scrollWidth - viewport.clientWidth);
             if (getDistance() > 20) {
-              rail.dataset.railReady = "true";
               const tween = gsap.to(track,{
                 x: () => -getDistance(),
                 ease:"none",
@@ -119,6 +121,8 @@ export function SolutionReveal() {
                 },
               });
               localCleanups.push(()=>{tween.kill();rail.removeAttribute("data-rail-ready");panels.forEach(panel=>panel.removeAttribute("data-active"));});
+            } else {
+              rail.removeAttribute("data-rail-ready");
             }
           }
 
