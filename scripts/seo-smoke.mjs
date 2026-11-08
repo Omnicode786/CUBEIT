@@ -51,7 +51,10 @@ try{
     check(/<title>[^<]+<\/title>/i.test(r.text),`${path} has title`);
     check(/<meta[^>]+name=["']description["']/i.test(r.text),`${path} has meta description`);
     check(/<h1[\s>]/i.test(r.text),`${path} has server-rendered H1`);
-    check(attr(r.text)===`${canonicalOrigin}${path}`,`${path} has absolute intended canonical`);
+    const canonical = attr(r.text);
+    const expected = `${canonicalOrigin}${path}`;
+    check(path === "/" ? [canonicalOrigin, `${canonicalOrigin}/`].includes(canonical) : canonical === expected,
+      `${path} has absolute intended canonical (received ${canonical ?? "none"})`);
     if(path.startsWith("/solutions/")){
       check(/application\/ld\+json/i.test(r.text),`${path} has structured data`);
       check(r.text.includes("BreadcrumbList"),`${path} includes breadcrumbs schema`);
