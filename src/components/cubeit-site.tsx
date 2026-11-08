@@ -1284,6 +1284,10 @@ export function Footer() {
             <a href="/">Home</a>
             <a href="/services">Services</a>
             <a href="/solutions">Website, Software & AI Solutions</a>
+            <a href="/solutions/website-development-pakistan">Website Development in Pakistan</a>
+            <a href="/solutions/ecommerce-development-pakistan">E-commerce Development</a>
+            <a href="/solutions/custom-software-development-pakistan">Custom Software &amp; SaaS</a>
+            <a href="/solutions/ai-automation-development-pakistan">AI Automation &amp; Agents</a>
             <a href="/our-work">Things We Build</a>
             <a href="/team">Team</a>
             <a href="/contact">Contact</a>
