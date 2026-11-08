@@ -33,7 +33,7 @@ const wait=async()=>{
   }
   throw Error("Next.js server not ready");
 };
-const attr=(html,attribute)=>html.match(new RegExp(`<link[^>]+rel=["']canonical["'][^>]+href=["']([^"']+)`, "i"))?.[1]
+const attr=(html)=>html.match(new RegExp(`<link[^>]+rel=["']canonical["'][^>]+href=["']([^"']+)`, "i"))?.[1]
   ?? html.match(new RegExp(`<link[^>]+href=["']([^"']+)["'][^>]+rel=["']canonical["']`, "i"))?.[1];
 try{
   await wait();
@@ -51,7 +51,7 @@ try{
     check(/<title>[^<]+<\/title>/i.test(r.text),`${path} has title`);
     check(/<meta[^>]+name=["']description["']/i.test(r.text),`${path} has meta description`);
     check(/<h1[\s>]/i.test(r.text),`${path} has server-rendered H1`);
-    check(attr(r.text)===`${canonicalOrigin}${path==="/"?"":path}`,`${path} has absolute intended canonical`);
+    check(attr(r.text)===`${canonicalOrigin}${path}`,`${path} has absolute intended canonical`);
     if(path.startsWith("/solutions/")){
       check(/application\/ld\+json/i.test(r.text),`${path} has structured data`);
       check(r.text.includes("BreadcrumbList"),`${path} includes breadcrumbs schema`);
