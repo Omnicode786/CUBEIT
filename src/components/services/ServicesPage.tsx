@@ -151,10 +151,15 @@ export default function ServicesPage() {
             <div className="section-actions">
               <a className="btn btn-primary" href="/contact">Start a project <ArrowUpRight aria-hidden="true" /></a>
               <a className="btn btn-secondary" href="/solutions">Explore focused solutions <ArrowUpRight aria-hidden="true" /></a>
-              <a className="sr-only focus:not-sr-only" href="/solutions/website-development-pakistan">Website development in Pakistan</a>
-              <a className="sr-only focus:not-sr-only" href="/solutions/custom-software-development-pakistan">Custom software development in Pakistan</a>
               <a className="btn btn-secondary" href="#service-story">Explore services</a>
             </div>
+            <nav className={styles.discoveryLinks} aria-label="Explore services for Pakistan businesses">
+              <span>Popular solutions</span>
+              <a href="/solutions/website-development-pakistan">Business websites <ArrowUpRight size={14} aria-hidden="true" /></a>
+              <a href="/solutions/ecommerce-development-pakistan">Online stores <ArrowUpRight size={14} aria-hidden="true" /></a>
+              <a href="/solutions/custom-software-development-pakistan">Custom software <ArrowUpRight size={14} aria-hidden="true" /></a>
+              <a href="/solutions/ai-automation-development-pakistan">AI automation <ArrowUpRight size={14} aria-hidden="true" /></a>
+            </nav>
           </div>
           <div className={styles.heroIndex} aria-label="Service categories">
             {cubeitServices.map((service) => (
