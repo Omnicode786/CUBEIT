@@ -1179,3 +1179,11 @@
     transform: none !important;
   }
 }
+
+/* Contextual internal links are visible to people, not SEO-only hidden links. */
+.discoveryLinks{display:flex;align-items:center;flex-wrap:wrap;gap:10px 17px;margin-top:24px;max-width:940px}
+.discoveryLinks>span{font-size:10px;font-weight:800;letter-spacing:.13em;text-transform:uppercase;color:var(--muted);margin-right:4px}
+.discoveryLinks>a{display:inline-flex;align-items:center;gap:5px;border:1px solid var(--line);background:var(--surface-strong);color:var(--ink);border-radius:999px;font-size:12px;font-weight:750;padding:9px 12px;transition:transform .25s ease,border-color .25s ease}
+.discoveryLinks>a:hover{transform:translateY(-2px);border-color:rgba(30,99,244,.5)}
+.discoveryLinks>a:focus-visible{outline:2px solid #1e63f4;outline-offset:4px}
+@media(max-width:600px){.discoveryLinks{gap:8px}.discoveryLinks>span{width:100%}}
