@@ -23,6 +23,7 @@ export default function sitemap(): MetadataRoute.Sitemap {
     })),
     ...solutions.map((solution) => ({
       url: `${siteUrl}/solutions/${solution.slug}`,
+      lastModified: new Date("2026-11-08T00:00:00+05:00"),
       changeFrequency: "monthly" as const,
       priority: 0.85,
     })),
