@@ -21,6 +21,7 @@
  */
 
 import { useEffect, useState } from "react";
+import { usePathname } from "next/navigation";
 import Image from "next/image";
 import { motion, AnimatePresence, useReducedMotion } from "motion/react";
 
@@ -39,12 +40,16 @@ const SPRING = [0.16, 1, 0.3, 1] as const;
 const EASE_OUT = [0.4, 0, 0.2, 1] as const;
 
 export default function LoadingScreen() {
+  const pathname = usePathname();
   const reduced = useReducedMotion();
   const [visible,  setVisible]  = useState(false);
   const [pageReady, setPageReady] = useState(false); // fires when window.load is done
   const [msgIndex, setMsgIndex] = useState(0);
 
   useEffect(() => {
+    // Search-intent landing pages expose their content without an artificial
+    // minimum-duration loading overlay; keep the homepage experience intact.
+    if (pathname === "/solutions" || pathname?.startsWith("/solutions/")) return;
     const nav = performance.getEntriesByType(
       "navigation",
     )[0] as PerformanceNavigationTiming | undefined;
@@ -79,7 +84,7 @@ export default function LoadingScreen() {
       clearInterval(msgTimer);
       window.removeEventListener("load", dismiss);
     };
-  }, []);
+  }, [pathname]);
 
   return (
     <AnimatePresence>

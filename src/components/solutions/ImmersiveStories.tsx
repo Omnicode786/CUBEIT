@@ -30,15 +30,15 @@ export function ArtifactScene({ kind, compact = false }: { kind: Solution["slug"
           <div className={styles.commerceProductArt} data-shape={n}><span className={styles.productSculpture}/></div>
           <div><b>FORM / {n}</b><small>{["Everyday essential","New perspective","Considered design"][i]}</small></div>
         </div>)}</div>
-        <div className={styles.commerceToast}><span className={styles.toastDot}/><div><strong>Order confirmed</strong><span>From browse to buy</span></div><ArrowUpRight size={15}/></div>
+        <div className={styles.commerceToast}><span className={styles.toastDot}/><div><strong>Checkout preview</strong><span>Illustrative journey</span></div><ArrowUpRight size={15}/></div>
       </div>}
       {type === "software" && <div className={styles.artifactSoftware}>
         <div className={styles.softwareSide}><strong>C<span>·</span></strong><span className={styles.sideActive}>◈</span><span>▦</span><span>◉</span><span>⚙</span></div>
         <div className={styles.softwareBody}>
-          <div className={styles.softwareTop}><div><small>PLATFORM / OVERVIEW</small><b>Operations, in sync.</b></div><span>● LIVE SYSTEM</span></div>
-          <div className={styles.softwareStats}><div><span>Projects in motion</span><strong>24</strong><small>↑ Across your workspace</small></div><div><span>Tasks completed</span><strong>89%</strong><small>↑ Connected delivery</small></div></div>
+          <div className={styles.softwareTop}><div><small>CONCEPT DEMO / NOT LIVE CLIENT DATA</small><b>Operations, in sync.</b></div><span>● ILLUSTRATIVE</span></div>
+          <div className={styles.softwareStats}><div><span>Projects in motion</span><strong>24</strong><small>Example dashboard</small></div><div><span>Tasks completed</span><strong>89%</strong><small>Sample metric</small></div></div>
           <div className={styles.softwareChart}><div className={styles.chartTitle}><b>Activity / this month</b><span>LIVE ANALYTICS</span></div><div className={styles.chartBars}>{[42,68,53,79,62,95,73,100,86,96,80,93].map((h,i)=><span data-chart-bar key={i} style={{height:`${h}%`}}/>)}</div></div>
-          <div className={styles.softwareBottom}><div><span className={styles.systemPulse}/> All systems connected</div><span>Updated just now</span></div>
+          <div className={styles.softwareBottom}><div><span className={styles.systemPulse}/> Concept interface</div><span>Illustrative data</span></div>
         </div>
       </div>}
       {type === "ai" && <div className={styles.artifactAi}>
