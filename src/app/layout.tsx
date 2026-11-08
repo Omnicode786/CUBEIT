@@ -7,7 +7,7 @@ import LoadingScreen from "@/components/loading-screen";
 
 const siteUrl = "https://www.cubeit.solutions";
 const siteDescription =
-  "CubeIT designs and engineers AI products, custom software, SaaS platforms and intelligent business workflows. Explore our solutions, portfolio and team.";
+  "CubeIT designs business websites, e-commerce stores, custom software, SaaS platforms and AI automation for companies in Pakistan and beyond.";
 
 const nunitoSans = Nunito_Sans({
   subsets: ["latin"],
@@ -20,7 +20,7 @@ export const metadata: Metadata = {
   metadataBase: new URL(siteUrl),
   applicationName: "CubeIT",
   title: {
-    default: "CubeIT | AI Products, Custom Software & SaaS Engineering",
+    default: "CubeIT | Website Development, Custom Software & AI in Pakistan",
     template: "%s | CubeIT",
   },
   description: siteDescription,
@@ -53,10 +53,13 @@ const organizationSchema = {
       "@type": "Organization",
       "@id": `${siteUrl}/#organization`,
       name: "CubeIT",
+      alternateName: "CubeIT Solutions",
       url: siteUrl,
       logo: `${siteUrl}/brand/cubeit-logo.png`,
       description: siteDescription,
       knowsAbout: [
+        "Business website development in Pakistan",
+        "E-commerce website development",
         "Custom software development",
         "Artificial intelligence applications",
         "SaaS product engineering",
